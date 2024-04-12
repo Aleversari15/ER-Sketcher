@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@joint/core": "^4.0.2"
+  }
+}

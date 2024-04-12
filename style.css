@@ -1,0 +1,144 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.main {
+    margin-top: 5pt;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+main>.drawContainer {
+    flex: 1; /* Questa proprietà fa sì che il div occupi tutto lo spazio rimanente */
+    width: 100%;
+    background-color: rgb(214, 206, 206);
+    border-radius: 10pt;
+    overflow: auto; /* Aggiungi uno scrolling se il contenuto è troppo grande */
+}
+
+body{
+    height:96%;
+    margin-left: 3pt;
+    margin-right: 3pt;
+    display: flex;
+    flex-direction: column;
+    justify-content:center;
+}
+
+
+body>header{
+    position: sticky;
+}
+
+.pulsantiSalvataggio i{
+    color: rgb(99, 13, 99);
+}
+
+.barraIntestazione, .barraComandi, footer{
+    width:100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.barraComandi, footer{
+    
+    border-radius: 10pt;
+    margin:0 auto;
+}
+
+.barraIntestazione>p{
+    color:rgb(99, 13, 99);
+    font-weight: bold;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 16pt;
+}
+
+.barraComandi{
+    background-color: rgb(99, 13, 99);
+    padding-top:10pt;
+    padding-bottom:10pt;
+}
+
+.pulsantiSalvataggio{
+    height: 100%;
+    
+}
+
+
+footer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 0;
+    margin:5pt auto;
+}
+
+
+.bottoniSpecifici i, footer i, footer button{
+    color: white;
+}
+
+.bottoniSpecifici button{
+    background-color: rgb(99, 13, 99);
+    border:none; 
+    height:100%;
+}
+
+.bottoniSpecifici{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.bottoniSpecifici>div{
+    display: flex;
+    flex-direction: column;
+    margin:0;
+    padding:0;
+    margin-right: 10pt;
+}
+
+.bottoniSpecifici>div>p{
+    color:white;
+    margin:0;
+    padding:0;
+}
+
+.pulsantiSalvataggio button{
+    border:none;
+    background-color: white;
+}
+
+.barraComandi>button{
+    background-color: rgb(99, 13, 99);
+    color:white;
+    border:none;
+}
+
+
+.nomeProgetto{
+    padding:5pt;
+    background-color: rgb(247, 207, 247);
+    border-radius: 5pt;
+    border:none;
+}
+
+button{
+    cursor: pointer;
+}
+
+footer button{
+    border:none;
+    background-color: rgb(99, 13, 99);
+    padding: 5pt;
+    border-radius: 10pt;
+}
+

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
+    <!-- Mettere logo web app -->
+    <link rel="icon" href="https://glitch.com/favicon.ico" />
+    <title>ER-Sketcher</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@joint/core@4.0.1/dist/joint.js"></script>
+
+    <!--Script creati da me-->
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="barraIntestazione">
+        <p>ER-Sketcher</p>
+        <form>
+          <input type="text" class="nomeProgetto" placeholder="Inserisci nome progetto"/>
+        </form>
+        <div class="pulsantiSalvataggio">
+          <button><i class="fas fa-save fa-2x"></i></button>
+          <button><i class="fas fa-plus fa-2x"></i></button>
+          <button><i class="fas fa-download fa-2x"></i></button>
+        </div>
+      </div>
+      <div class="barraComandi">
+        <div class="bottoniSpecifici">
+          <button><i class="fas fa-arrow-left fa-2x"></i></button>
+          <button><i class="fas fa-arrow-right fa-2x"></i></button>
+          <div class="entity">
+            <button class="buttonDrawEntity"><i class="far fa-square fa-2x"></i></button>
+            <p>Entity</p>
+          </div>
+          <div class="key">
+            <button><i class="fas fa-key fa-2x"></i></button>
+            <p>Key</p>
+          </div>
+          <div class="relation">
+            <button class="buttonCreateRelation"><i class="fas fa-project-diagram fa-2x"></i></button>
+            <p>Relation</p>
+          </div>
+
+        </div>
+        <button><i class="fas fa-bars fa-2x"></i></button>
+      </div>
+    </header>
+    <main>
+      <div id="drawContainer" class="drawContainer"></div>
+    </main>
+  </body>
+  <footer>
+    <button class="edit"><i class="fas fa-pencil-alt fa-2x"></i>Edit JSON</button>
+    <div class="zoom">
+      <button><i class="fas fa-search-plus fa-2x"></i></button>
+      <button><i class="fas fa-search-minus fa-2x"></i></button>
+    </div>
+    <div></div>
+  </footer>
+</html>
