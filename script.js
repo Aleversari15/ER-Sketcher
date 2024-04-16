@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function(){
 var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
-var diagramEntities = []; 
 var selectedRectangles = []; 
 
 /*counters*/
@@ -17,6 +16,8 @@ var paper = new joint.dia.Paper({
     model: graph,
     gridSize: 1,
     gridSize: 10,
+    width: '100%',
+    height: 800, //da fixare
     drawGrid: true,
     cellViewNamespace: namespace
 });
@@ -49,7 +50,6 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
             }
         });
         rect.addTo(graph);
-        diagramEntities.push(rect);  //in un vettore mi salvo tutte le entità che aggiungo
         buttonEntitySelected = false;
     }
     }
@@ -64,9 +64,13 @@ document.querySelector('.buttonCreateRelation').addEventListener('click', functi
 
 // Funzione per creare un'associazione tra due entità
 function createLinkBetweenEntities(entity1, entity2) {
-    var link = new joint.shapes.standard.Link({
-        source: entity1,
-        target: entity2
+    var link = new joint.shapes.standard.Link;
+    link.source(entity1);
+    link.target(entity2);
+    link.attr({
+        line: {
+            targetMarker: null
+        }
     });
     graph.addCell(link);
 }
