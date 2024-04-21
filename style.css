@@ -16,7 +16,7 @@ html, body {
 main>.drawContainer {
     flex: 1; /* Questa proprietà fa sì che il div occupi tutto lo spazio rimanente */
     width: 100%;
-    background-color: rgb(214, 206, 206);
+    background-color: rgb(233, 227, 227);
     border-radius: 10pt;
     overflow: auto; /* Aggiungi uno scrolling se il contenuto è troppo grande */
 }
@@ -142,3 +142,63 @@ footer button{
     border-radius: 10pt;
 }
 
+
+
+/* The sidepanel menu */
+.sidepanel {
+    height: 100%; /* Specify a height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    left: 0;
+    background-color: rgb(255, 255, 255); /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 60px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidepanel */
+  }
+  
+  /* The sidepanel links */
+  .sidepanel a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 12pt;
+    color: grey;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  /* When you mouse over the navigation links, change their color */
+  .sidepanel a:hover {
+    color: rgb(99, 13, 99);
+  }
+  
+  /* Position and style the close button (top right corner) */
+  .sidepanel .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+    color: rgb(99, 13, 99);
+  }
+  
+  /* Style the button that is used to open the sidepanel */
+  .openbtn {
+    cursor: pointer;
+    background-color:rgb(99, 13, 99);
+    color: white;
+    font-size: 12pt;
+  }
+  
+  .openbtn:hover {
+    background-color: #444;
+  }
+
+  footer button:hover{
+    background-color: #444;
+  }
+
+  ul{
+    list-style: none;
+  }

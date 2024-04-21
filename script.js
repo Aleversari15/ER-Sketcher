@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function(){
 var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
-var selectedRectangles = []; 
+var selectedShapes = []; 
 
 /*counters*/
 var entityCounter = 0;
@@ -9,7 +9,8 @@ var relationCounter = 0;
 
 /*Booleans*/ 
 var buttonEntitySelected = false;
-var buttonCreateRelationSelected = false;
+var buttonConnectSelected = false;
+var buttonRelationSelected = false;
 
 var paper = new joint.dia.Paper({
     el: document.getElementById('drawContainer'),
@@ -28,11 +29,23 @@ document.querySelector('.buttonDrawEntity').addEventListener('click', function()
     buttonEntitySelected=true;
 })
 
+/*Quando l'utente clicca sul pulsante relation*/ 
+document.querySelector('.buttonRelation').addEventListener('click', function(){
+    relationCounter++;
+    buttonRelationSelected = true;
+})
+
+//Quando l'utente clicca sul bottone relation
+document.querySelector('.buttonConnect').addEventListener('click', function(){
+    relationCounter++;
+    buttonConnectSelected = true;
+})
+
 /*Quando l'utente clicca sul riquadro per il disegno dopo aver selezionato il bottone entity*/ 
 document.querySelector('.drawContainer').addEventListener('click', function(event){
-    var rect = event.target.getBoundingClientRect(); // Ottieni le dimensioni e la posizione dell'elemento
-    var mouseX = event.clientX - rect.left; // Calcola la coordinata X rispetto all'elemento
-    var mouseY = event.clientY - rect.top; // Calcola la coordinata Y rispetto all'elemento
+    var shape = event.target.getBoundingClientRect(); // Ottieni le dimensioni e la posizione dell'elemento
+    var mouseX = event.clientX - shape.left; // Calcola la coordinata X rispetto all'elemento
+    var mouseY = event.clientY - shape.top; // Calcola la coordinata Y rispetto all'elemento
 
     if(buttonEntitySelected===true){
         var rect = new joint.shapes.standard.Rectangle();
@@ -51,22 +64,27 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         });
         rect.addTo(graph);
         buttonEntitySelected = false;
+        
     }
+    else if(buttonRelationSelected === true){
+        var diamond = new joint.shapes.standard.Polygon();
+        diamond.resize(120, 120);
+        diamond.position(mouseX, mouseY - 60);
+        diamond.attr('root/title', 'joint.shapes.standard.Polygon');
+        diamond.attr('label/text', 'RELATION'+relationCounter);
+        diamond.attr('body/refPoints', '0,10 10,0 20,10 10,20');
+        diamond.addTo(graph);
+        buttonRelationSelected = false;
     }
-);
+});
 
 
-//Quando l'utente clicca sul bottone relation
-document.querySelector('.buttonCreateRelation').addEventListener('click', function(){
-    relationCounter++;
-    buttonCreateRelationSelected = true;
-})
 
-// Funzione per creare un'associazione tra due entità
-function createLinkBetweenEntities(entity1, entity2) {
+// Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
+function createLinkBetweenEntities(shape1, shape2) {
     var link = new joint.shapes.standard.Link;
-    link.source(entity1);
-    link.target(entity2);
+    link.source(shape1);
+    link.target(shape2);
     link.attr({
         line: {
             targetMarker: null
@@ -75,21 +93,22 @@ function createLinkBetweenEntities(entity1, entity2) {
     graph.addCell(link);
 }
 
-// Aggiungi l'evento di doppio clic a tutti i rettangoli
+// Aggiungi l'evento di doppio clic a tutti i rettangoli e rombi, che da la possibilità di selezionarli
 paper.on('element:pointerdblclick', function(cellView) {
     var cell = cellView.model;
-    if (cell.isElement() && cell.attributes.type === 'standard.Rectangle' && buttonCreateRelationSelected) {
-        if (!selectedRectangles.includes(cell)) {
-            selectedRectangles.push(cell);
-            console.log('Rettangolo selezionato');
+    if (cell.isElement() && (cell.attributes.type === 'standard.Rectangle' || cell.attributes.type === 'standard.Polygon' ) && buttonConnectSelected) {
+        if (!selectedShapes.includes(cell)) {
+            selectedShapes.push(cell);
             cell.attr('body/stroke', 'yellow');
         }
-        if (selectedRectangles.length === 2) {
-            createLinkBetweenEntities(selectedRectangles[0], selectedRectangles[1]);
-            selectedRectangles[0].attr('body/stroke', 'purple');
-            selectedRectangles[1].attr('body/stroke', 'purple');
-            selectedRectangles = []; //svuoto il vettore delle entità selezionate
-            buttonCreateRelationSelected = false; //deselezione il pulsante per le relations
+        /**Se sono state selezionate due shapes e una è un rettangolo e l'altra un rombo allora posso fare l'associazione, svuotare il vettore e deselezionare il bottone */
+        if (selectedShapes.length === 2 && ((selectedShapes[0].attributes.type === 'standard.Rectangle' && selectedShapes[1].attributes.type === 'standard.Polygon') || 
+        (selectedShapes[0].attributes.type === 'standard.Polygon' && selectedShapes[1].attributes.type === 'standard.Rectangle'))) {
+            createLinkBetweenEntities(selectedShapes[0], selectedShapes[1]);
+            selectedShapes[0].attr('body/stroke', 'purple');
+            selectedShapes[1].attr('body/stroke', 'purple');
+            selectedShapes = []; //svuoto il vettore delle entità selezionate
+            buttonConnectSelected = false; //deselezione il pulsante per le relations
         }
     }
 });

@@ -42,7 +42,11 @@
             <p>Key</p>
           </div>
           <div class="relation">
-            <button class="buttonCreateRelation"><i class="fas fa-project-diagram fa-2x"></i></button>
+            <button class="buttonConnect"><i class="fas fa-project-diagram fa-2x"></i></button>
+            <p>Connect</p>
+          </div>
+          <div>
+            <button class="buttonRelation"><i class="far fa-gem fa-2x"></i></button>
             <p>Relation</p>
           </div>
 
@@ -55,7 +59,26 @@
     </main>
   </body>
   <footer>
-    <button class="edit"><i class="fas fa-pencil-alt fa-2x"></i>Edit JSON</button>
+    <div id="mySidepanel" class="sidepanel">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <ul class="json-container">
+        <li><p class="json data">Json element</p></li>
+      </ul>
+    </div>
+    
+    <button class="openbtn edit" onclick="openNav()"><i class="fas fa-pencil-alt fa-2x"></i> Edit JSON</button>
+
+    <script>  
+    function openNav() {
+      document.getElementById("mySidepanel").style.width = "500px";
+    }
+
+    /* Set the width of the sidebar to 0 (hide it) */
+    function closeNav() {
+      document.getElementById("mySidepanel").style.width = "0";
+    }
+    </script>  
+
     <div class="zoom">
       <button><i class="fas fa-search-plus fa-2x"></i></button>
       <button><i class="fas fa-search-minus fa-2x"></i></button>
