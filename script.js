@@ -79,7 +79,6 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
 });
 
 
-
 // Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
 function createLinkBetweenEntities(shape1, shape2) {
     var link = new joint.shapes.standard.Link;
@@ -112,6 +111,40 @@ paper.on('element:pointerdblclick', function(cellView) {
         }
     }
 });
+
+function getShapeJSON(shape) {
+    return JSON.stringify(shape.attributes, null, 4);
+}
+
+function updateJSONList() {
+    var jsonContainer = document.querySelector('.json-container');
+    jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
+    
+    // Itera tutte le shape nel grafo e aggiungi il JSON corrispondente alla lista
+    graph.getCells().forEach(function(cell) {
+        var jsonItem = document.createElement('li');
+        var shapeJSON = getShapeJSON(cell);
+        jsonItem.textContent = shapeJSON;
+        jsonContainer.appendChild(jsonItem);
+       
+    });
+
+    hljs.highlightBlock(jsonContainer);
+}
+
+//Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
+document.querySelector('.openJSON').addEventListener('click', function(){
+    //inserisco le info nel pannello 
+    updateJSONList();
+    //rendo il pannello visibile
+    document.getElementById("mySidepanel").style.width = "500px"; 
+    
+});
+
+document.querySelector('.closebtn').addEventListener('click', function(){
+    document.getElementById("mySidepanel").style.width = "0";
+})
+
 
 })
 

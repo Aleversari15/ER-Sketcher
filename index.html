@@ -9,7 +9,11 @@
     <title>ER-Sketcher</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
+
+    <!--Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/vs.min.css">
+
     <!-- dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@joint/core@4.0.1/dist/joint.js"></script>
 
@@ -60,24 +64,13 @@
   </body>
   <footer>
     <div id="mySidepanel" class="sidepanel">
-      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="javascript:void(0)" class="closebtn">&times;</a>
       <ul class="json-container">
-        <li><p class="json data">Json element</p></li>
+        
       </ul>
     </div>
     
-    <button class="openbtn edit" onclick="openNav()"><i class="fas fa-pencil-alt fa-2x"></i> Edit JSON</button>
-
-    <script>  
-    function openNav() {
-      document.getElementById("mySidepanel").style.width = "500px";
-    }
-
-    /* Set the width of the sidebar to 0 (hide it) */
-    function closeNav() {
-      document.getElementById("mySidepanel").style.width = "0";
-    }
-    </script>  
+    <button class="openbtn edit openJSON"><i class="fas fa-pencil-alt fa-2x"></i> Edit JSON</button>
 
     <div class="zoom">
       <button><i class="fas fa-search-plus fa-2x"></i></button>
