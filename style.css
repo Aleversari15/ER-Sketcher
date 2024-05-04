@@ -210,12 +210,10 @@ footer button{
 .json-container {
     padding: 10px;
     white-space: pre-wrap; /* Per far andare a capo il testo */
-    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; /* Utilizza un font monospazio per il testo JSON */
 }
 
 /* Stile per gli elementi della lista JSON */
 .json-container li {
     display: block; /* Imposta gli elementi <li> come bloccati */
     margin-bottom: 10px; /* Aggiunge uno spazio tra gli elementi della lista */
-   
 }
