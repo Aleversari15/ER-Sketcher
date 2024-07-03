@@ -64,6 +64,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         });
         rect.addTo(graph);
         buttonEntitySelected = false;
+        addAttributeToShape(rect, graph);
         
     }
     else if(buttonRelationSelected === true){
@@ -79,18 +80,6 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
 });
 
 
-// Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
-function createLinkBetweenEntities(shape1, shape2) {
-    var link = new joint.shapes.standard.Link;
-    link.source(shape1);
-    link.target(shape2);
-    link.attr({
-        line: {
-            targetMarker: null
-        }
-    });
-    graph.addCell(link);
-}
 
 // Aggiungi l'evento di doppio clic a tutti i rettangoli e rombi, che da la possibilità di selezionarli
 paper.on('element:pointerdblclick', function(cellView) {
@@ -103,7 +92,7 @@ paper.on('element:pointerdblclick', function(cellView) {
         /**Se sono state selezionate due shapes e una è un rettangolo e l'altra un rombo allora posso fare l'associazione, svuotare il vettore e deselezionare il bottone */
         if (selectedShapes.length === 2 && ((selectedShapes[0].attributes.type === 'standard.Rectangle' && selectedShapes[1].attributes.type === 'standard.Polygon') || 
         (selectedShapes[0].attributes.type === 'standard.Polygon' && selectedShapes[1].attributes.type === 'standard.Rectangle'))) {
-            createLinkBetweenEntities(selectedShapes[0], selectedShapes[1]);
+            createLinkBetweenEntities(selectedShapes[0], selectedShapes[1], graph);
             selectedShapes[0].attr('body/stroke', 'purple');
             selectedShapes[1].attr('body/stroke', 'purple');
             selectedShapes = []; //svuoto il vettore delle entità selezionate
@@ -112,30 +101,11 @@ paper.on('element:pointerdblclick', function(cellView) {
     }
 });
 
-function getShapeJSON(shape) {
-    return JSON.stringify(shape.attributes, null, 4);
-}
-
-function updateJSONList() {
-    var jsonContainer = document.querySelector('.json-container');
-    jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
-    
-    // Itera tutte le shape nel grafo e aggiungi il JSON corrispondente alla lista
-    graph.getCells().forEach(function(cell) {
-        var jsonItem = document.createElement('li');
-        var shapeJSON = getShapeJSON(cell);
-        jsonItem.textContent = shapeJSON;
-        jsonContainer.appendChild(jsonItem);
-       
-    });
-
-    hljs.highlightBlock(jsonContainer);
-}
 
 //Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
 document.querySelector('.openJSON').addEventListener('click', function(){
     //inserisco le info nel pannello 
-    updateJSONList();
+    updateJSONList(graph);
     //rendo il pannello visibile
     document.getElementById("mySidepanel").style.width = "500px"; 
     
