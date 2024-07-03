@@ -1,6 +1,7 @@
 html, body {
     margin: 0;
     padding: 0;
+   
 }
 
 .main {
@@ -11,11 +12,14 @@ html, body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position:relative;
+
 }
 
 main>.drawContainer {
     flex: 1; /* Questa proprietà fa sì che il div occupi tutto lo spazio rimanente */
     width: 100%;
+    height: 100%;
     background-color: rgb(233, 227, 227);
     border-radius: 10pt;
     overflow: auto; /* Aggiungi uno scrolling se il contenuto è troppo grande */
@@ -216,4 +220,21 @@ footer button{
 .json-container li {
     display: block; /* Imposta gli elementi <li> come bloccati */
     margin-bottom: 10px; /* Aggiunge uno spazio tra gli elementi della lista */
+}
+
+
+.command-palette{
+    background-color: rgb(99, 13, 99);
+    position: absolute;
+    top: 20px; /* Distanza dal bordo superiore */
+    right: 20px; /* Distanza dal bordo destro */
+    border: 1px solid #ccc;
+    padding: 10px;
+    top: 40%;
+    z-index: 1000; /* Assicurati che la palette sia sopra altri elementi */
+    border-radius: 20pt;
+}
+
+.command-group>button{
+    margin: 5pt;
 }

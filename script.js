@@ -116,6 +116,23 @@ document.querySelector('.closebtn').addEventListener('click', function(){
 })
 
 
+
+
+// Aggiungi l'ascoltatore di eventi per il clic sulle shape
+paper.on('element:pointerdown', function(elementView) {
+    showCommandPalette(elementView.model);
+});
+
+
+
+// Aggiungi gestori per i pulsanti della palette
+document.getElementById('delete-button').addEventListener('click', function() {
+    deleteShape(graph);
+});
+
+document.getElementById('rename-button').addEventListener('click', function() {
+    renameShape(graph);
+});
 })
 
 

@@ -55,3 +55,46 @@ function updateJSONList(graph) {
 
     hljs.highlightBlock(jsonContainer);
 }
+
+
+//FUNZIONI PER PALETTE DEI COMANDI
+
+function showCommandPalette(shape) {
+    var palette = document.getElementById('command-palette');
+    palette.style.display = 'block';
+
+    // Memorizza l'ID della shape selezionata
+    palette.setAttribute('data-shape-id', shape.id);
+}
+
+function hideCommandPalette() {
+    var palette = document.getElementById('command-palette');
+    palette.style.display = 'none';
+}
+
+function deleteShape(graph) {
+    var palette = document.getElementById('command-palette');
+    var shapeId = palette.getAttribute('data-shape-id');
+    var shape = graph.getCell(shapeId);
+
+    if (shape) {
+        shape.remove();
+    }
+
+    hideCommandPalette();
+}
+
+function renameShape(graph) {
+    var palette = document.getElementById('command-palette');
+    var shapeId = palette.getAttribute('data-shape-id');
+    var shape = graph.getCell(shapeId);
+
+    if (shape) {
+        var newName = prompt("Inserisci il nuovo nome:");
+        if (newName) {
+            shape.attr('text/text', newName);
+        }
+    }
+
+    hideCommandPalette();
+}
