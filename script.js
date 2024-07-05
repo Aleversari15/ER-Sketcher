@@ -129,23 +129,25 @@ paper.on('element:pointerdown', function(elementView) {
 
 
 //EVENTI CLICK SU COMANDI PALETTE
-// Aggiungi gestori per i pulsanti della palette
 document.getElementsByClassName('delete-button')[0].addEventListener('click', function() {
-    deleteShape(graph);
+    deleteShape(shapeClicked);
+    shapeClicked = null;
 });
 
 document.getElementsByClassName('rename-button')[0].addEventListener('click', function() {
-    renameShape(graph);
+    console.log(shapeClicked);
+    renameShape(shapeClicked);
+    shapeClicked = null;
 });
 
 document.getElementsByClassName('key-button')[0].addEventListener('click', function(){
     setKey(shapeClicked);
-
+    shapeClicked = null;
 })
 
 document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
     addAttributeToShape(shapeClicked,graph);
-
+    shapeClicked = null;
 })
 
 

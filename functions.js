@@ -81,32 +81,22 @@ function setKey(shape){
     shape.attr('body/fill', 'black');
 }
 
-/*function deleteShape(graph) {
-    var palette = document.getElementById('command-palette');
-    var shapeId = palette.getAttribute('data-shape-id');
-    var shape = graph.getCell(shapeId);
-
+function deleteShape(shape) {
     if (shape) {
         shape.remove();
     }
-
     hideCommandPalette();
 }
 
-function renameShape(graph) {
-    var palette = document.getElementById('command-palette');
-    var shapeId = palette.getAttribute('data-shape-id');
-    var shape = graph.getCell(shapeId);
-
+function renameShape(shape) {
     if (shape) {
         var newName = prompt("Inserisci il nuovo nome:");
         if (newName) {
-            shape.attr('text/text', newName);
+            shape.attr('label/text', newName);
         }
     }
-
     hideCommandPalette();
-}*/
+}
 
 
 // Funzione per aggiornare l'altezza del paper
