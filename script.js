@@ -12,13 +12,16 @@ var buttonEntitySelected = false;
 var buttonConnectSelected = false;
 var buttonRelationSelected = false;
 
+//può essere un'entità, una relazione, un link o un'attributo
+var shapeClicked = null;
+
 var paper = new joint.dia.Paper({
     el: document.getElementById('drawContainer'),
     model: graph,
     gridSize: 1,
     gridSize: 10,
     width: '100%',
-    height: 800, //da fixare
+    height: 800,
     drawGrid: true,
     cellViewNamespace: namespace
 });
@@ -40,6 +43,7 @@ document.querySelector('.buttonConnect').addEventListener('click', function(){
     relationCounter++;
     buttonConnectSelected = true;
 })
+
 
 /*Quando l'utente clicca sul riquadro per il disegno dopo aver selezionato il bottone entity*/ 
 document.querySelector('.drawContainer').addEventListener('click', function(event){
@@ -64,7 +68,6 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         });
         rect.addTo(graph);
         buttonEntitySelected = false;
-        addAttributeToShape(rect, graph);
         
     }
     else if(buttonRelationSelected === true){
@@ -116,23 +119,36 @@ document.querySelector('.closebtn').addEventListener('click', function(){
 })
 
 
-
-
 // Aggiungi l'ascoltatore di eventi per il clic sulle shape
 paper.on('element:pointerdown', function(elementView) {
-    showCommandPalette(elementView.model);
+    if(shapeClicked!=elementView.model){
+        showCommandPalette(elementView.model);
+        shapeClicked = elementView.model; 
+    }
 });
 
 
-
+//EVENTI CLICK SU COMANDI PALETTE
 // Aggiungi gestori per i pulsanti della palette
-document.getElementById('delete-button').addEventListener('click', function() {
+document.getElementsByClassName('delete-button')[0].addEventListener('click', function() {
     deleteShape(graph);
 });
 
-document.getElementById('rename-button').addEventListener('click', function() {
+document.getElementsByClassName('rename-button')[0].addEventListener('click', function() {
     renameShape(graph);
 });
+
+document.getElementsByClassName('key-button')[0].addEventListener('click', function(){
+    setKey(shapeClicked);
+
+})
+
+document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
+    addAttributeToShape(shapeClicked,graph);
+
+})
+
+
 })
 
 

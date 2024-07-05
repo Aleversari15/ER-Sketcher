@@ -5,9 +5,11 @@ function addAttributeToShape(shape, graph) {
     
     // Definisci la posizione dell'attributo relativa alla shape
     var attributePosition = {
-        x: position.x + 1, // Aggiusta questa distanza in base alla tua esigenza
-        y: position.y - 4
+        x: position.x +100, // Aggiusta questa distanza in base alla tua esigenza
+        y: position.y - 130
     };
+
+    console.log('Shape position:', attributePosition);
 
     var attributo = new joint.shapes.standard.Circle();
     attributo.resize(20, 20);
@@ -36,6 +38,8 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
     graph.addCell(link);
 }
 
+
+//GESTIONE PANNELLO JSON
 function getShapeJSON(shape) {
     return JSON.stringify(shape.attributes, null, 4);
 }
@@ -57,22 +61,27 @@ function updateJSONList(graph) {
 }
 
 
+
+
 //FUNZIONI PER PALETTE DEI COMANDI
 
 function showCommandPalette(shape) {
-    var palette = document.getElementById('command-palette');
+    var palette = document.getElementsByClassName('command-palette')[0];
     palette.style.display = 'block';
-
     // Memorizza l'ID della shape selezionata
     palette.setAttribute('data-shape-id', shape.id);
 }
 
 function hideCommandPalette() {
-    var palette = document.getElementById('command-palette');
+    var palette = document.getElementsByClassName('command-palette')[0];
     palette.style.display = 'none';
 }
 
-function deleteShape(graph) {
+function setKey(shape){
+    shape.attr('body/fill', 'black');
+}
+
+/*function deleteShape(graph) {
     var palette = document.getElementById('command-palette');
     var shapeId = palette.getAttribute('data-shape-id');
     var shape = graph.getCell(shapeId);
@@ -97,4 +106,14 @@ function renameShape(graph) {
     }
 
     hideCommandPalette();
+}*/
+
+
+// Funzione per aggiornare l'altezza del paper
+function updatePaperHeight(paper) {
+    var drawContainer = document.getElementById('drawContainer');
+    if (drawContainer) {
+        var height = drawContainer.clientHeight;
+        paper.setDimensions(drawContainer.clientWidth, height);
+    }
 }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     <!-- Mettere logo web app -->
-    <link rel="icon" href="logoER2.png" />
+    <link rel="icon" href="resources/logoER2.png" />
     <title>ER-Sketcher</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -25,7 +25,7 @@
   <body>
     <header>
       <div class="barraIntestazione">
-        <p>ER-Sketcher</p>
+        <img src="resources/ER-Sketcher2-04-07-2024.png"/>
         <form>
           <input type="text" class="nomeProgetto" placeholder="Inserisci nome progetto"/>
         </form>
@@ -37,22 +37,18 @@
       </div>
       <div class="barraComandi">
         <div class="bottoniSpecifici">
-          <button><i class="fas fa-arrow-left fa-2x"></i></button>
-          <button><i class="fas fa-arrow-right fa-2x"></i></button>
+          <button><i class="fas fa-arrow-left "></i></button>
+          <button><i class="fas fa-arrow-right "></i></button>
           <div class="entity">
-            <button class="buttonDrawEntity"><i class="far fa-square fa-2x"></i></button>
+            <button class="buttonDrawEntity"><i class="far fa-square "></i></button>
             <p>Entity</p>
           </div>
-          <div class="key">
-            <button><i class="fas fa-key fa-2x"></i></button>
-            <p>Key</p>
-          </div>
           <div class="relation">
-            <button class="buttonConnect"><i class="fas fa-project-diagram fa-2x"></i></button>
+            <button class="buttonConnect"><i class="fas fa-project-diagram "></i></button>
             <p>Connect</p>
           </div>
           <div>
-            <button class="buttonRelation"><i class="far fa-gem fa-2x"></i></button>
+            <button class="buttonRelation"><i class="far fa-gem "></i></button>
             <p>Relation</p>
           </div>
 
@@ -65,16 +61,16 @@
       <div id="paper"></div>
       <div class="command-palette">
         <div class="command-group">
-          <button id="delete-button">Elimina</button>
-          <button id="rename-button">Rinomina</button>
+          <button class="delete-button"><i class="fas fa-trash-alt "></i></button>
+          <button class="rename-button"><i class="fab fa-autoprefixer "></i></button>
         </div>
         <div class="command-group">
-          <button id="delete-button">Elimina</button>
-          <button id="rename-button">Rinomina</button>
+          <button class="key-button"><i class="fas fa-key"></i></button>
+          <button class="attribute-button"><i class="fas fa-map-pin"></i></i></button>
         </div>
         <div class="command-group">
-          <button id="delete-button">Elimina</button>
-          <button id="rename-button">Rinomina</button>
+          <button id="delete-button"><i class="fas fa-trash-alt "></i></button>
+          <button id="rename-button"><i class="fab fa-autoprefixer "></i></button>
         </div>
           <!-- Aggiungi altri pulsanti se necessario -->
       </div>
@@ -88,11 +84,11 @@
       </ul>
     </div>
     
-    <button class="openbtn edit openJSON"><i class="fas fa-pencil-alt fa-2x"></i> Edit JSON</button>
+    <button class="openbtn edit openJSON"><i class="fas fa-pencil-alt "></i> Edit JSON</button>
 
     <div class="zoom">
-      <button><i class="fas fa-search-plus fa-2x"></i></button>
-      <button><i class="fas fa-search-minus fa-2x"></i></button>
+      <button><i class="fas fa-search-plus "></i></button>
+      <button><i class="fas fa-search-minus "></i></button>
     </div>
     <div></div>
   </footer>

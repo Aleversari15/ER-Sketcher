@@ -19,7 +19,6 @@ html, body {
 main>.drawContainer {
     flex: 1; /* Questa proprietà fa sì che il div occupi tutto lo spazio rimanente */
     width: 100%;
-    height: 100%;
     background-color: rgb(233, 227, 227);
     border-radius: 10pt;
     overflow: auto; /* Aggiungi uno scrolling se il contenuto è troppo grande */
@@ -39,6 +38,7 @@ body>header{
     position: sticky;
 }
 
+
 .pulsantiSalvataggio i{
     color: rgb(99, 13, 99);
 }
@@ -51,17 +51,15 @@ body>header{
     align-items: center;
 }
 
+.barraIntestazione>img{
+    width: 15%;
+    
+}
+
 .barraComandi, footer{
     
     border-radius: 10pt;
     margin:0 auto;
-}
-
-.barraIntestazione>p{
-    color:rgb(99, 13, 99);
-    font-weight: bold;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: 16pt;
 }
 
 .barraComandi{
@@ -116,6 +114,10 @@ footer{
     padding:0;
 }
 
+.bottoniSpecifici>div{
+    margin-left: 10pt;
+}
+
 .pulsantiSalvataggio button{
     border:none;
     background-color: white;
@@ -130,7 +132,7 @@ footer{
 
 .nomeProgetto{
     padding:5pt;
-    background-color: rgb(247, 207, 247);
+    background-color:#c8a2c8;
     border-radius: 5pt;
     border:none;
 }
@@ -223,18 +225,45 @@ footer button{
 }
 
 
+/*stile per palette dei comandi*/
 .command-palette{
     background-color: rgb(99, 13, 99);
     position: absolute;
-    top: 20px; /* Distanza dal bordo superiore */
     right: 20px; /* Distanza dal bordo destro */
     border: 1px solid #ccc;
-    padding: 10px;
+    padding:10pt;
     top: 40%;
     z-index: 1000; /* Assicurati che la palette sia sopra altri elementi */
     border-radius: 20pt;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    display: none;
 }
 
-.command-group>button{
-    margin: 5pt;
+.command-group{
+    width:98%;
+    margin-top: 2pt;
+    margin-bottom: 2pt;
+    display:flex;
+    flex-direction: row;
+    align-items: center;
 }
+  
+.command-group button {
+    background-color: white;
+    color: rgb(99, 13, 99);
+    border: 1px solid rgb(99, 13, 99);
+    border-radius: 5px;
+    margin-right: 5px;
+    padding: 10px;
+    font-size: 16px;
+    width:45%;
+    align-items: center;
+}
+  
+.command-group button:hover {
+    background-color: #c8a2c8;
+    color: white;
+}
+  
