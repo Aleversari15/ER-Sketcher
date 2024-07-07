@@ -176,6 +176,7 @@ var linkClicked = null; // da togliere
 paper.on('link:pointerclick', function(linkView) {
     shapeClicked = linkView.model; //perchè non funziona quando lo passo alla funzione per aggiornare la cardinalità?
     linkClicked = linkView.model;
+    showCommandPalette(linkView.model);
     console.log('Link selezionato:', shapeClicked);
 });
 

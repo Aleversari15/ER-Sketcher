@@ -73,6 +73,13 @@ function showCommandPalette(shape) {
     palette.style.display = 'block';
     // Memorizza l'ID della shape selezionata
     palette.setAttribute('data-shape-id', shape.id);
+
+    /*aggiungere metodo che aggiorna la palette in base a ciò che è stato selezionato
+    entità -> elimina,rinomina, aggiungi attributo, aggiungi attributo composto 
+    attributo -> elimina, rinomina, chiave
+    attributo composto -> elimina, rinomina,aggiungi attributo 
+    link -> elimina, aggiungi cardinalità
+    */
 }
 
 function hideCommandPalette() {
