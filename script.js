@@ -2,7 +2,16 @@ document.addEventListener('DOMContentLoaded', function(){
 var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
 var selectedShapes = []; 
-var cardinalities = ['(0-1)', '(1-1)','(1-N)', '(0-N)', '(N-N)', 'Altro'];
+var cardinalities = ['0-1', '1-1','1-N', '0-N', 'N-N', 'Altro'];
+
+// Popola il menu a tendina con le opzioni del vettore cardinalities
+var select = document.getElementsByClassName('cardinality')[0];
+cardinalities.forEach(function(value) {
+    var option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+});
 
 /*counters*/
 var entityCounter = 0;
@@ -45,6 +54,8 @@ document.querySelector('.buttonConnect').addEventListener('click', function(){
     relationCounter++;
     buttonConnectSelected = true;
 })
+
+
 
 
 /*Quando l'utente clicca sul riquadro per il disegno dopo aver selezionato il bottone entity*/ 
@@ -153,6 +164,28 @@ document.getElementsByClassName('attribute-button')[0].addEventListener('click',
     shapeClicked = null;
 })
 
+document.getElementsByClassName('cardinality')[0].addEventListener('click', function(){
+   
+    shapeClicked = null;
+})
+
+
+
+var linkClicked = null; // da togliere
+// Gestisce la selezione di un link
+paper.on('link:pointerclick', function(linkView) {
+    shapeClicked = linkView.model; //perchè non funziona quando lo passo alla funzione per aggiornare la cardinalità?
+    linkClicked = linkView.model;
+    console.log('Link selezionato:', shapeClicked);
+});
+
+// Gestisce il cambio del valore del menu a tendina
+select.addEventListener('change', function() {
+    var value = select.value;
+    updateLinkLabel(linkClicked, value);
+    linkClicked = null;
+    shapeClicked= null;
+});
 
 })
 

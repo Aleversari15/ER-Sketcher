@@ -110,3 +110,20 @@ function updatePaperHeight(paper) {
         paper.setDimensions(drawContainer.clientWidth, height);
     }
 }
+
+
+
+// Funzione per aggiornare la label del link in base alla scelta della cardinalità
+function updateLinkLabel(link, label) {
+    if (link) {
+        link.label(0, {
+            position: 0.5,
+            attrs: {
+                text: { text: label }
+            }
+        });
+        console.log('Label del link cambiata in:', label);
+    } else {
+        alert('Seleziona un link prima di cambiare la label.');
+    }
+}
