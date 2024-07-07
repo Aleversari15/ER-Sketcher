@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function(){
 var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
 var selectedShapes = []; 
+var cardinalities = ['(0-1)', '(1-1)','(1-N)', '(0-N)', '(N-N)', 'Altro'];
 
 /*counters*/
 var entityCounter = 0;

@@ -69,7 +69,13 @@
           <button class="attribute-button"><i class="fas fa-map-pin"></i></button>
         </div>
         <div class="command-group">
-          <button id="cardinality-button">(_,_)</button>
+          <select class="cardinality" name="cardinality">
+            <option value="0-1">0-1</option>
+            <option value="0-N">0-N</option>
+            <option value="1-N">1-N</option>
+            <option value="N-N">N-N</option>
+            <option value="Altro">Altro</option>
+          </select>
           <button id="subAttribute-button">SubAttr.</button>
         </div>
         <div class="command-group">

@@ -250,7 +250,7 @@ footer button{
     align-items: center;
 }
   
-.command-group button {
+.command-group button, .cardinality {
     background-color: white;
     color: rgb(99, 13, 99);
     border: 1px solid rgb(99, 13, 99);
