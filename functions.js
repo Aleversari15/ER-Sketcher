@@ -1,5 +1,5 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
-function addAttributeToShape(shape, graph) {
+function addAttributeToShape(shape, graph, counter) {
     // Ottieni la posizione della shape
     var position = shape.position();
     
@@ -16,6 +16,9 @@ function addAttributeToShape(shape, graph) {
     attributo.position(attributePosition);
     attributo.attr('root/title', 'joint.shapes.standard.Circle');
     attributo.attr('body/fill', 'white');
+    attributo.attr('label/text', 'attributo'+counter);
+    attributo.attr('label/ref-y', -10);  // 10 pixel sopra il cerchio
+    attributo.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
 
     // Aggiungi l'attributo al grafo
     graph.addCell(attributo);

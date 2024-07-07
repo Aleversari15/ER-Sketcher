@@ -6,6 +6,7 @@ var selectedShapes = [];
 /*counters*/
 var entityCounter = 0;
 var relationCounter = 0;
+var attributesCounter = 0;
 
 /*Booleans*/ 
 var buttonEntitySelected = false;
@@ -146,7 +147,8 @@ document.getElementsByClassName('key-button')[0].addEventListener('click', funct
 })
 
 document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
-    addAttributeToShape(shapeClicked,graph);
+    attributesCounter++;
+    addAttributeToShape(shapeClicked,graph, attributesCounter);
     shapeClicked = null;
 })
 
