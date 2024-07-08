@@ -160,12 +160,18 @@ document.getElementsByClassName('key-button')[0].addEventListener('click', funct
 
 document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter);
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal');
     shapeClicked = null;
 })
 
 document.getElementsByClassName('cardinality')[0].addEventListener('click', function(){
    
+    shapeClicked = null;
+})
+
+document.getElementsByClassName('subAttribute')[0].addEventListener('click', function(){
+    attributesCounter++;
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute');
     shapeClicked = null;
 })
 

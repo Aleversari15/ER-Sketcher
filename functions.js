@@ -1,5 +1,5 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
-function addAttributeToShape(shape, graph, counter) {
+function addAttributeToShape(shape, graph, counter, type) {
     // Ottieni la posizione della shape
     var position = shape.position();
     
@@ -11,14 +11,21 @@ function addAttributeToShape(shape, graph, counter) {
 
     console.log('Shape position:', attributePosition);
 
-    var attributo = new joint.shapes.standard.Circle();
-    attributo.resize(20, 20);
+    if(type === 'normal'){
+        var attributo = new joint.shapes.standard.Circle();
+        attributo.resize(20, 20);
+        attributo.attr('label/ref-y', -10);  // 10 pixel sopra il cerchio
+        attributo.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
+    }else{
+        var attributo = new joint.shapes.standard.Ellipse();
+        attributo.resize(70, 40);
+    }
+    
     attributo.position(attributePosition);
     attributo.attr('root/title', 'joint.shapes.standard.Circle');
     attributo.attr('body/fill', 'white');
     attributo.attr('label/text', 'attributo'+counter);
-    attributo.attr('label/ref-y', -10);  // 10 pixel sopra il cerchio
-    attributo.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
+   
 
     // Aggiungi l'attributo al grafo
     graph.addCell(attributo);
@@ -26,6 +33,7 @@ function addAttributeToShape(shape, graph, counter) {
     createLinkBetweenEntities(attributo, shape, graph);
 
 }
+
 
 
 // Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
