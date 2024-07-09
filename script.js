@@ -244,7 +244,7 @@ paper.on('link:pointerclick', function(linkView) {
 
 // Gestisce il cambio del valore del menu a tendina per la cardinalità
 selectCardinality.addEventListener('change', function() {
-    var value = select.value;
+    var value = selectCardinality.value;
     updateLinkLabel(linkClicked, value);
     linkClicked = null;
     shapeClicked= null;
@@ -252,7 +252,7 @@ selectCardinality.addEventListener('change', function() {
 
 // Gestisce il cambio del valore del menu a tendina per la copertura della gerarchia
 selectCoverage.addEventListener('change', function() {
-    var value = select.value;
+    var value = selectCoverage.value;
     updateLinkLabel(linkClicked, value);
     linkClicked = null;
     shapeClicked= null;
