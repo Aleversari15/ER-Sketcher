@@ -3,14 +3,24 @@ var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
 var selectedShapes = []; 
 var cardinalities = ['0-1', '1-1','1-N', '0-N', 'N-N', 'Altro'];
+var coverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
 
 // Popola il menu a tendina con le opzioni del vettore cardinalities
-var select = document.getElementsByClassName('cardinality')[0];
+var selectCardinality = document.getElementsByClassName('cardinality')[0];
 cardinalities.forEach(function(value) {
     var option = document.createElement('option');
     option.value = value;
     option.textContent = value;
-    select.appendChild(option);
+    selectCardinality.appendChild(option);
+});
+
+
+var selectCoverage =  document.getElementsByClassName('coverage')[0];
+coverages.forEach(function(value) {
+    var option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    selectCoverage.appendChild(option);
 });
 
 /*counters*/
@@ -206,13 +216,26 @@ paper.on('link:pointerclick', function(linkView) {
     console.log('Link selezionato:', shapeClicked);
 });
 
-// Gestisce il cambio del valore del menu a tendina
-select.addEventListener('change', function() {
+
+//metodi che gestiscono i cambi di valore nei select, sono da aggiungere ancora molti dettagli. Il primo deve essere applicato solo ai link standard, il secondo a quelli di tipo gerachia. 
+
+// Gestisce il cambio del valore del menu a tendina per la cardinalità
+selectCardinality.addEventListener('change', function() {
     var value = select.value;
     updateLinkLabel(linkClicked, value);
     linkClicked = null;
     shapeClicked= null;
 });
+
+// Gestisce il cambio del valore del menu a tendina per la copertura della gerarchia
+selectCoverage.addEventListener('change', function() {
+    var value = select.value;
+    updateLinkLabel(linkClicked, value);
+    linkClicked = null;
+    shapeClicked= null;
+});
+
+
 
 })
 

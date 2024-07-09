@@ -139,17 +139,6 @@ function renameShape(shape) {
 }
 
 
-// Funzione per aggiornare l'altezza del paper
-function updatePaperHeight(paper) {
-    var drawContainer = document.getElementById('drawContainer');
-    if (drawContainer) {
-        var height = drawContainer.clientHeight;
-        paper.setDimensions(drawContainer.clientWidth, height);
-    }
-}
-
-
-
 // Funzione per aggiornare la label del link in base alla scelta della cardinalità
 function updateLinkLabel(link, label) {
     if (link) {

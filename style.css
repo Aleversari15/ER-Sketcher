@@ -229,9 +229,8 @@ footer button{
 .command-palette{
     background-color: rgb(99, 13, 99);
     position: absolute;
-    right: 20px; /* Distanza dal bordo destro */
-    border: 1px solid #ccc;
-    padding:10pt;
+    right: 10pt;
+    padding:5pt;
     top: 40%;
     z-index: 1000; /* Assicurati che la palette sia sopra altri elementi */
     border-radius: 20pt;
@@ -242,23 +241,24 @@ footer button{
 }
 
 .command-group{
-    width:98%;
-    margin-top: 2pt;
-    margin-bottom: 2pt;
+    width:100%;
+    margin-top: 5pt;
+    margin-bottom: 5pt;
     display:flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-around;
+    
 }
   
-.command-group button, .cardinality {
+.command-group button, .cardinality, .coverage {
     background-color: white;
     color: rgb(99, 13, 99);
     border: 1px solid rgb(99, 13, 99);
     border-radius: 5px;
-    margin-right: 5px;
     padding: 10px;
     font-size: 16px;
-    width:45%;
+    width:49%;
     align-items: center;
 }
   
