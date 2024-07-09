@@ -28,7 +28,7 @@ function addAttributeToShape(shape, graph, counter) {
 }
 
 
-//funzione per creare un attributo compoto o un identificatore esterno
+//funzione per creare un attributo composto o un identificatore esterno
 function createKeyFromLinks(vlinks, graph){
     for(i=0; i<(vlinks.length-1); i++){
         //se è il primo link creo un attributo, altrimenti solo un link
@@ -57,6 +57,30 @@ function createKeyFromLinks(vlinks, graph){
     }
 }
 
+function setParent(currentElementSelected, cell, graph){
+    var link = new joint.shapes.standard.Link;
+    link.source({
+        id: currentElementSelected.id,
+        connectionPoint: { name: 'boundary', args: { selector: 'body' } }
+    });
+    link.target({
+        id: cell.id,
+        connectionPoint: { name: 'boundary', args: { selector: 'body' } }
+    });
+    link.attr({
+        line: {
+            targetMarker: {
+                'type': 'path',
+                'd': 'M 20 -10 L 0 0 L 20 10 Z',
+                'fill': 'white',
+                'stroke': 'black',
+                'stroke-width': 1
+            }
+        }
+    });
+    graph.addCell(link);
+}
+
 
 // Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
 function createLinkBetweenEntities(shape1, shape2, graph) {
@@ -65,7 +89,12 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
     link.target(shape2);
     link.attr({
         line: {
-            targetMarker: null
+            targetMarker: {
+                'type': 'path',
+                'fill': 'blue',
+                'stroke': 'green',
+                'stroke-width': 2
+            }
         }
     });
     graph.addCell(link);

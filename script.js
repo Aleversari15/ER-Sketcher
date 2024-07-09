@@ -4,24 +4,9 @@ var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
 var selectedShapes = []; 
 var cardinalities = ['0-1', '1-1','1-N', '0-N', 'N-N', 'Altro'];
 var coverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
+var currentElementSelected = null; 
+var linkClicked = null; // da togliere
 
-// Popola il menu a tendina con le opzioni del vettore cardinalities
-var selectCardinality = document.getElementsByClassName('cardinality')[0];
-cardinalities.forEach(function(value) {
-    var option = document.createElement('option');
-    option.value = value;
-    option.textContent = value;
-    selectCardinality.appendChild(option);
-});
-
-
-var selectCoverage =  document.getElementsByClassName('coverage')[0];
-coverages.forEach(function(value) {
-    var option = document.createElement('option');
-    option.value = value;
-    option.textContent = value;
-    selectCoverage.appendChild(option);
-});
 
 /*counters*/
 var entityCounter = 0;
@@ -48,6 +33,29 @@ var paper = new joint.dia.Paper({
     drawGrid: true,
     cellViewNamespace: namespace
 });
+
+
+
+// Popola il menu a tendina con le opzioni del vettore cardinalities
+var selectCardinality = document.getElementsByClassName('cardinality')[0];
+cardinalities.forEach(function(value) {
+    var option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    selectCardinality.appendChild(option);
+});
+
+
+var selectCoverage =  document.getElementsByClassName('coverage')[0];
+coverages.forEach(function(value) {
+    var option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    selectCoverage.appendChild(option);
+});
+
+
+
 
 /*Quando l'utente clicca sul pulsante entity*/ 
 document.querySelector('.buttonDrawEntity').addEventListener('click', function(){
@@ -127,6 +135,13 @@ paper.on('element:pointerdblclick', function(cellView) {
             buttonConnectSelected = false; //deselezione il pulsante per le relations
         }
     }
+    //se la selezione è attiva e clicco su un rettangolo
+    else if(selecting && (cell.isElement() && (cell.attributes.type === 'standard.Rectangle'))){
+        //metodo che dato un'entità figlia e una padre, crea la gerarchia
+        setParent(currentElementSelected, cell, graph); 
+        selecting = false; 
+
+    }
 });
 
 
@@ -205,9 +220,17 @@ paper.on('blank:pointerclick', function(){
     
 } )
 
+document.querySelector('.hierarchy').addEventListener('click', function(){
+    selecting = true; 
+    currentElementSelected = shapeClicked; //da sistemare 
+    console.log("Entità selezionata: ", currentElementSelected);
+})
 
 
-var linkClicked = null; // da togliere
+
+
+
+
 // Gestisce la selezione di un link
 paper.on('link:pointerclick', function(linkView) {
     shapeClicked = linkView.model; //perchè non funziona quando lo passo alla funzione per aggiornare la cardinalità?
