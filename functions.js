@@ -1,12 +1,12 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
 function addAttributeToShape(shape, graph, counter) {
-    // Ottieni la posizione della shape
+    
     var position = shape.position();
     
-    // Definisci la posizione dell'attributo relativa alla shape
+    
     var attributePosition = {
-        x: position.x +100, // Aggiusta questa distanza in base alla tua esigenza
-        y: position.y - 130
+        x: position.x +10, 
+        y: position.y - 10
     };
 
     console.log('Shape position:', attributePosition);
@@ -25,6 +25,36 @@ function addAttributeToShape(shape, graph, counter) {
 
     createLinkBetweenEntities(attributo, shape, graph);
 
+}
+
+
+//funzione per creare un attributo compoto o un identificatore esterno
+function createKeyFromLinks(vlinks, graph){
+    for(i=0; i<(vlinks.length-1); i++){
+        //se è il primo link creo un attributo, altrimenti solo un link
+        if(i===0){
+            var position = vlinks[i];
+            
+            var attributePosition = {
+                x: position.x + 100, 
+                y: position.y
+            };
+            console.log("Sono in i=0");
+            var attributo = new joint.shapes.standard.Circle();
+            attributo.resize(20, 20);
+            attributo.position(attributePosition);
+            attributo.attr('root/title', 'joint.shapes.standard.Circle');
+            attributo.attr('body/fill', 'black');
+             // Aggiungi l'attributo al grafo
+            graph.addCell(attributo);
+
+            createLinkBetweenEntities(attributo, vlinks[i], graph);
+            //createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
+        }
+        else{
+            createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
+        }
+    }
 }
 
 

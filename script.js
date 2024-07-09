@@ -22,9 +22,11 @@ var attributesCounter = 0;
 var buttonEntitySelected = false;
 var buttonConnectSelected = false;
 var buttonRelationSelected = false;
+var selecting = false; 
 
 //può essere un'entità, una relazione, un link o un'attributo
 var shapeClicked = null;
+var links=[];
 
 var paper = new joint.dia.Paper({
     el: document.getElementById('drawContainer'),
@@ -168,6 +170,30 @@ document.getElementsByClassName('cardinality')[0].addEventListener('click', func
    
     shapeClicked = null;
 })
+
+document.querySelector('.composedId').addEventListener('click', function(){
+    selecting = true; 
+    links=[];
+})
+
+paper.on('link:pointerdblclick', function(linkView) {
+    if(selecting){
+        links.push(linkView.getBBox().center());
+    }
+});
+
+paper.on('blank:pointerclick', function(){
+    if(selecting === true){
+        //disegno il link
+        /*console.log("Lista di link: ", links);
+        createLinkBetweenEntities(links[0],links[1], graph);
+        addAttributeToShape(links[0], graph, attributesCounter, 'normal'); //in realtà non dovrà avere un nome e dovrà essere una chiave*/
+        createKeyFromLinks(links, graph)
+        
+        selecting = false; 
+    }
+    
+} )
 
 
 
