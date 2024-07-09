@@ -89,12 +89,7 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
     link.target(shape2);
     link.attr({
         line: {
-            targetMarker: {
-                'type': 'path',
-                'fill': 'blue',
-                'stroke': 'green',
-                'stroke-width': 2
-            }
+            targetMarker: null
         }
     });
     graph.addCell(link);
