@@ -8,6 +8,7 @@ var currentElementSelected = null;
 var linkClicked = null; // da togliere
 
 
+
 /*counters*/
 var entityCounter = 0;
 var relationCounter = 0;
@@ -22,6 +23,7 @@ var selecting = false;
 //può essere un'entità, una relazione, un link o un'attributo
 var shapeClicked = null;
 var links=[];
+var linksId=[];
 
 var paper = new joint.dia.Paper({
     el: document.getElementById('drawContainer'),
@@ -199,22 +201,20 @@ document.getElementsByClassName('cardinality')[0].addEventListener('click', func
 document.querySelector('.composedId').addEventListener('click', function(){
     selecting = true; 
     links=[];
+    linksId=[];
 })
 
 paper.on('link:pointerdblclick', function(linkView) {
     if(selecting){
         links.push(linkView.getBBox().center());
+        linksId.push(linkView.model);
     }
 });
 
 paper.on('blank:pointerclick', function(){
     if(selecting === true){
         //disegno il link
-        /*console.log("Lista di link: ", links);
-        createLinkBetweenEntities(links[0],links[1], graph);
-        addAttributeToShape(links[0], graph, attributesCounter, 'normal'); //in realtà non dovrà avere un nome e dovrà essere una chiave*/
-        createKeyFromLinks(links, graph)
-        
+        createKeyFromLinks(links, graph, linksId)
         selecting = false; 
         links=[];
     }
@@ -230,6 +230,7 @@ document.querySelector('.hierarchy').addEventListener('click', function(){
 document.querySelector('.extId').addEventListener('click', function(){
     selecting = true; 
     links=[];
+    linksId=[];
 })
 
 
@@ -263,6 +264,7 @@ selectCoverage.addEventListener('change', function() {
     linkClicked = null;
     shapeClicked= null;
 });
+
 
 
 

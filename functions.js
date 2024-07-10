@@ -3,13 +3,13 @@ function addAttributeToShape(shape, graph, counter) {
     
     var position = shape.position();
     
-    
     var attributePosition = {
-        x: position.x +10, 
+        x: position.x + 10, 
         y: position.y - 10
     };
 
-    console.log('Shape position:', attributePosition);
+    console.log('Shape position:',position)
+    console.log('Attribute position:', attributePosition);
 
     var attributo = new joint.shapes.standard.Circle();
     attributo.resize(20, 20);
@@ -29,7 +29,7 @@ function addAttributeToShape(shape, graph, counter) {
 
 
 //funzione per creare un attributo composto o un identificatore esterno
-function createKeyFromLinks(vlinks, graph){
+/*function createKeyFromLinks(vlinks, graph){
     if(vlinks.length > 1){
         for(i=0; i<(vlinks.length-1); i++){
             //se è il primo link creo un attributo, altrimenti solo un link
@@ -75,7 +75,45 @@ function createKeyFromLinks(vlinks, graph){
                 createLinkBetweenEntities(attributo, vlinks[0], graph);
     }
     
+}*/
+function createKeyFromLinks(vlinks, graph, linksId){
+    var position = vlinks[0];
+                
+    var attributePosition = {
+        x: position.x + 10, 
+         y: position.y
+    };
+
+    console.log(attributePosition);
+    var attributo = new joint.shapes.standard.Circle();
+                attributo.resize(20, 20);
+                attributo.position(attributePosition);
+                attributo.attr('root/title', 'joint.shapes.standard.Circle');
+                attributo.attr('body/fill', 'black');
+                graph.addCell(attributo);
+
+    var endLink = vlinks[vlinks.length-1];
+    var link = new joint.shapes.standard.Link();
+    link.source(attributo);
+    link.target(endLink);
+    link.router('metro'); // Applica il router metro al link
+    link.attr({
+        line: {
+            targetMarker: null
+        }
+    });
+    //escludo l'ultimo per non creare doppi passaggi sullo stesso vertice
+    if (vlinks.length > 2) {
+        link.vertices(vlinks.slice(0, vlinks.length - 1));
+    }
+
+    var anchor = { name: 'connectionPerpendicular', args: { connectionPoint: 'middle' } };
+    link.set('target', { id: linksId[linksId.length -1].id, selector: 'body', anchor: anchor });
+    link.set('surce', { id: attributo.id, selector: 'body', anchor: anchor });
+    console.log(vlinks)
+    link.addTo(graph)
 }
+
 
 function setParent(currentElementSelected, cell, graph){
     var link = new joint.shapes.standard.Link;
