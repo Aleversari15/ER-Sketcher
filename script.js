@@ -247,6 +247,8 @@ paper.on('link:pointerclick', function(linkView) {
 });
 
 
+
+
 //metodi che gestiscono i cambi di valore nei select, sono da aggiungere ancora molti dettagli. Il primo deve essere applicato solo ai link standard, il secondo a quelli di tipo gerachia. 
 
 // Gestisce il cambio del valore del menu a tendina per la cardinalità

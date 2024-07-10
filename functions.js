@@ -159,6 +159,23 @@ function getShapeJSON(shape) {
     return JSON.stringify(shape.attributes, null, 4);
 }
 
+
+function getShapeJSON2(cell) {
+    // Ottieni le proprietà base dell'elemento
+    var baseProperties = {
+        type: cell.get('type'),  // Tipo dell'elemento, ad esempio 'standard.Circle', 'standard.Rectangle', ecc.
+        id: cell.id,             // ID univoco dell'elemento nel grafo
+        attrs: cell.attr('label/text')       // Attributi visivi dell'elemento
+    };
+
+    // Rimuovi le proprietà che non desideri includere nel JSON
+    delete baseProperties.attrs.position;
+    delete baseProperties.attrs.size;
+
+    // Restituisci il JSON modificato
+    return JSON.stringify(baseProperties, null, 2); // Opzionale: formattazione per una visualizzazione più leggibile
+}
+
 function updateJSONList(graph) {
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
@@ -166,7 +183,7 @@ function updateJSONList(graph) {
     // Itera tutte le shape nel grafo e aggiungi il JSON corrispondente alla lista
     graph.getCells().forEach(function(cell) {
         var jsonItem = document.createElement('li');
-        var shapeJSON = getShapeJSON(cell);
+        var shapeJSON = getShapeJSON2(cell);
         jsonItem.textContent = shapeJSON;
         jsonContainer.appendChild(jsonItem);
        

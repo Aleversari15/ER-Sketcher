@@ -239,7 +239,7 @@ footer button{
     position: absolute;
     right: 10pt;
     padding:5pt;
-    top: 40%;
+    top: 2%;
     z-index: 1000; /* Assicurati che la palette sia sopra altri elementi */
     border-radius: 20pt;
     display: flex;
