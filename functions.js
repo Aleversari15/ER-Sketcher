@@ -3,13 +3,13 @@ function addAttributeToShape(shape, graph, counter, type) {
     // Ottieni la posizione della shape
     var position = shape.position();
     
-    // Definisci la posizione dell'attributo relativa alla shape
     var attributePosition = {
-        x: position.x +100, // Aggiusta questa distanza in base alla tua esigenza
-        y: position.y - 130
+        x: position.x + 10, 
+        y: position.y - 10
     };
 
-    console.log('Shape position:', attributePosition);
+    console.log('Shape position:',position)
+    console.log('Attribute position:', attributePosition);
 
     if(type === 'normal'){
         var attributo = new joint.shapes.standard.Circle();
@@ -35,6 +35,117 @@ function addAttributeToShape(shape, graph, counter, type) {
 }
 
 
+//funzione per creare un attributo composto o un identificatore esterno
+/*function createKeyFromLinks(vlinks, graph){
+    if(vlinks.length > 1){
+        for(i=0; i<(vlinks.length-1); i++){
+            //se è il primo link creo un attributo, altrimenti solo un link
+            if(i===0){
+                var position = vlinks[i];
+                
+                var attributePosition = {
+                    x: position.x + 100, 
+                    y: position.y
+                };
+                console.log("Sono in i=0");
+                var attributo = new joint.shapes.standard.Circle();
+                attributo.resize(20, 20);
+                attributo.position(attributePosition);
+                attributo.attr('root/title', 'joint.shapes.standard.Circle');
+                attributo.attr('body/fill', 'black');
+                 // Aggiungi l'attributo al grafo
+                graph.addCell(attributo);
+    
+                createLinkBetweenEntities(attributo, vlinks[i], graph);
+                //createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
+            }
+            else{
+                createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
+            }
+        }
+    }
+    else{
+        var position = vlinks[0];
+                
+                var attributePosition = {
+                    x: position.x + 100, 
+                    y: position.y
+                };
+                console.log("Sono in i=0");
+                var attributo = new joint.shapes.standard.Circle();
+                attributo.resize(20, 20);
+                attributo.position(attributePosition);
+                attributo.attr('root/title', 'joint.shapes.standard.Circle');
+                attributo.attr('body/fill', 'black');
+                 // Aggiungi l'attributo al grafo
+                graph.addCell(attributo);
+                createLinkBetweenEntities(attributo, vlinks[0], graph);
+    }
+    
+}*/
+function createKeyFromLinks(vlinks, graph, linksId){
+    var position = vlinks[0];
+                
+    var attributePosition = {
+        x: position.x + 10, 
+         y: position.y
+    };
+
+    console.log(attributePosition);
+    var attributo = new joint.shapes.standard.Circle();
+                attributo.resize(20, 20);
+                attributo.position(attributePosition);
+                attributo.attr('root/title', 'joint.shapes.standard.Circle');
+                attributo.attr('body/fill', 'black');
+                graph.addCell(attributo);
+
+    var endLink = vlinks[vlinks.length-1];
+    var link = new joint.shapes.standard.Link();
+    link.source(attributo);
+    link.target(endLink);
+    link.router('metro'); // Applica il router metro al link
+    link.attr({
+        line: {
+            targetMarker: null
+        }
+    });
+    //escludo l'ultimo per non creare doppi passaggi sullo stesso vertice
+    if (vlinks.length > 2) {
+        link.vertices(vlinks.slice(0, vlinks.length - 1));
+    }
+
+    var anchor = { name: 'connectionPerpendicular', args: { connectionPoint: 'middle' } };
+    link.set('target', { id: linksId[linksId.length -1].id, selector: 'body', anchor: anchor });
+    link.set('surce', { id: attributo.id, selector: 'body', anchor: anchor });
+    console.log(vlinks)
+    link.addTo(graph)
+}
+
+
+function setParent(currentElementSelected, cell, graph){
+    var link = new joint.shapes.standard.Link;
+    link.source({
+        id: currentElementSelected.id,
+        connectionPoint: { name: 'boundary', args: { selector: 'body' } }
+    });
+    link.target({
+        id: cell.id,
+        connectionPoint: { name: 'boundary', args: { selector: 'body' } }
+    });
+    link.attr({
+        line: {
+            targetMarker: {
+                'type': 'path',
+                'd': 'M 20 -10 L 0 0 L 20 10 Z',
+                'fill': 'white',
+                'stroke': 'black',
+                'stroke-width': 1
+            }
+        }
+    });
+    graph.addCell(link);
+}
+
 
 // Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
 function createLinkBetweenEntities(shape1, shape2, graph) {
@@ -55,6 +166,23 @@ function getShapeJSON(shape) {
     return JSON.stringify(shape.attributes, null, 4);
 }
 
+
+function getShapeJSON2(cell) {
+    // Ottieni le proprietà base dell'elemento
+    var baseProperties = {
+        type: cell.get('type'),  // Tipo dell'elemento, ad esempio 'standard.Circle', 'standard.Rectangle', ecc.
+        id: cell.id,             // ID univoco dell'elemento nel grafo
+        attrs: cell.attr('label/text')       // Attributi visivi dell'elemento
+    };
+
+    // Rimuovi le proprietà che non desideri includere nel JSON
+    delete baseProperties.attrs.position;
+    delete baseProperties.attrs.size;
+
+    // Restituisci il JSON modificato
+    return JSON.stringify(baseProperties, null, 2); // Opzionale: formattazione per una visualizzazione più leggibile
+}
+
 function updateJSONList(graph) {
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
@@ -62,7 +190,7 @@ function updateJSONList(graph) {
     // Itera tutte le shape nel grafo e aggiungi il JSON corrispondente alla lista
     graph.getCells().forEach(function(cell) {
         var jsonItem = document.createElement('li');
-        var shapeJSON = getShapeJSON(cell);
+        var shapeJSON = getShapeJSON2(cell);
         jsonItem.textContent = shapeJSON;
         jsonContainer.appendChild(jsonItem);
        
@@ -115,17 +243,6 @@ function renameShape(shape) {
     }
     hideCommandPalette();
 }
-
-
-// Funzione per aggiornare l'altezza del paper
-function updatePaperHeight(paper) {
-    var drawContainer = document.getElementById('drawContainer');
-    if (drawContainer) {
-        var height = drawContainer.clientHeight;
-        paper.setDimensions(drawContainer.clientWidth, height);
-    }
-}
-
 
 
 // Funzione per aggiornare la label del link in base alla scelta della cardinalità

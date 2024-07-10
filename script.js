@@ -3,15 +3,11 @@ var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
 var selectedShapes = []; 
 var cardinalities = ['0-1', '1-1','1-N', '0-N', 'N-N', 'Altro'];
+var coverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
+var currentElementSelected = null; 
+var linkClicked = null; // da togliere
 
-// Popola il menu a tendina con le opzioni del vettore cardinalities
-var select = document.getElementsByClassName('cardinality')[0];
-cardinalities.forEach(function(value) {
-    var option = document.createElement('option');
-    option.value = value;
-    option.textContent = value;
-    select.appendChild(option);
-});
+
 
 /*counters*/
 var entityCounter = 0;
@@ -22,9 +18,12 @@ var attributesCounter = 0;
 var buttonEntitySelected = false;
 var buttonConnectSelected = false;
 var buttonRelationSelected = false;
+var selecting = false; 
 
 //può essere un'entità, una relazione, un link o un'attributo
 var shapeClicked = null;
+var links=[];
+var linksId=[];
 
 var paper = new joint.dia.Paper({
     el: document.getElementById('drawContainer'),
@@ -36,6 +35,29 @@ var paper = new joint.dia.Paper({
     drawGrid: true,
     cellViewNamespace: namespace
 });
+
+
+
+// Popola il menu a tendina con le opzioni del vettore cardinalities
+var selectCardinality = document.getElementsByClassName('cardinality')[0];
+cardinalities.forEach(function(value) {
+    var option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    selectCardinality.appendChild(option);
+});
+
+
+var selectCoverage =  document.getElementsByClassName('coverage')[0];
+coverages.forEach(function(value) {
+    var option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    selectCoverage.appendChild(option);
+});
+
+
+
 
 /*Quando l'utente clicca sul pulsante entity*/ 
 document.querySelector('.buttonDrawEntity').addEventListener('click', function(){
@@ -115,6 +137,13 @@ paper.on('element:pointerdblclick', function(cellView) {
             buttonConnectSelected = false; //deselezione il pulsante per le relations
         }
     }
+    //se la selezione è attiva e clicco su un rettangolo
+    else if(selecting && (cell.isElement() && (cell.attributes.type === 'standard.Rectangle'))){
+        //metodo che dato un'entità figlia e una padre, crea la gerarchia
+        setParent(currentElementSelected, cell, graph); 
+        selecting = false; 
+
+    }
 });
 
 
@@ -175,9 +204,46 @@ document.getElementsByClassName('subAttribute')[0].addEventListener('click', fun
     shapeClicked = null;
 })
 
+document.querySelector('.composedId').addEventListener('click', function(){
+    selecting = true; 
+    links=[];
+    linksId=[];
+})
+
+paper.on('link:pointerdblclick', function(linkView) {
+    if(selecting){
+        links.push(linkView.getBBox().center());
+        linksId.push(linkView.model);
+    }
+});
+
+paper.on('blank:pointerclick', function(){
+    if(selecting === true){
+        //disegno il link
+        createKeyFromLinks(links, graph, linksId)
+        selecting = false; 
+        links=[];
+    }
+    
+} )
+
+document.querySelector('.hierarchy').addEventListener('click', function(){
+    selecting = true; 
+    currentElementSelected = shapeClicked; //da sistemare 
+    console.log("Entità selezionata: ", currentElementSelected);
+})
+
+document.querySelector('.extId').addEventListener('click', function(){
+    selecting = true; 
+    links=[];
+    linksId=[];
+})
 
 
-var linkClicked = null; // da togliere
+
+
+
+
 // Gestisce la selezione di un link
 paper.on('link:pointerclick', function(linkView) {
     shapeClicked = linkView.model; //perchè non funziona quando lo passo alla funzione per aggiornare la cardinalità?
@@ -186,13 +252,29 @@ paper.on('link:pointerclick', function(linkView) {
     console.log('Link selezionato:', shapeClicked);
 });
 
-// Gestisce il cambio del valore del menu a tendina
-select.addEventListener('change', function() {
-    var value = select.value;
+
+
+
+//metodi che gestiscono i cambi di valore nei select, sono da aggiungere ancora molti dettagli. Il primo deve essere applicato solo ai link standard, il secondo a quelli di tipo gerachia. 
+
+// Gestisce il cambio del valore del menu a tendina per la cardinalità
+selectCardinality.addEventListener('change', function() {
+    var value = selectCardinality.value;
     updateLinkLabel(linkClicked, value);
     linkClicked = null;
     shapeClicked= null;
 });
+
+// Gestisce il cambio del valore del menu a tendina per la copertura della gerarchia
+selectCoverage.addEventListener('change', function() {
+    var value = selectCoverage.value;
+    updateLinkLabel(linkClicked, value);
+    linkClicked = null;
+    shapeClicked= null;
+});
+
+
+
 
 })
 
