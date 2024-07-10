@@ -216,6 +216,7 @@ paper.on('blank:pointerclick', function(){
         createKeyFromLinks(links, graph)
         
         selecting = false; 
+        links=[];
     }
     
 } )
@@ -224,6 +225,11 @@ document.querySelector('.hierarchy').addEventListener('click', function(){
     selecting = true; 
     currentElementSelected = shapeClicked; //da sistemare 
     console.log("Entità selezionata: ", currentElementSelected);
+})
+
+document.querySelector('.extId').addEventListener('click', function(){
+    selecting = true; 
+    links=[];
 })
 
 

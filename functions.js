@@ -30,31 +30,51 @@ function addAttributeToShape(shape, graph, counter) {
 
 //funzione per creare un attributo composto o un identificatore esterno
 function createKeyFromLinks(vlinks, graph){
-    for(i=0; i<(vlinks.length-1); i++){
-        //se è il primo link creo un attributo, altrimenti solo un link
-        if(i===0){
-            var position = vlinks[i];
-            
-            var attributePosition = {
-                x: position.x + 100, 
-                y: position.y
-            };
-            console.log("Sono in i=0");
-            var attributo = new joint.shapes.standard.Circle();
-            attributo.resize(20, 20);
-            attributo.position(attributePosition);
-            attributo.attr('root/title', 'joint.shapes.standard.Circle');
-            attributo.attr('body/fill', 'black');
-             // Aggiungi l'attributo al grafo
-            graph.addCell(attributo);
-
-            createLinkBetweenEntities(attributo, vlinks[i], graph);
-            //createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
-        }
-        else{
-            createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
+    if(vlinks.length > 1){
+        for(i=0; i<(vlinks.length-1); i++){
+            //se è il primo link creo un attributo, altrimenti solo un link
+            if(i===0){
+                var position = vlinks[i];
+                
+                var attributePosition = {
+                    x: position.x + 100, 
+                    y: position.y
+                };
+                console.log("Sono in i=0");
+                var attributo = new joint.shapes.standard.Circle();
+                attributo.resize(20, 20);
+                attributo.position(attributePosition);
+                attributo.attr('root/title', 'joint.shapes.standard.Circle');
+                attributo.attr('body/fill', 'black');
+                 // Aggiungi l'attributo al grafo
+                graph.addCell(attributo);
+    
+                createLinkBetweenEntities(attributo, vlinks[i], graph);
+                //createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
+            }
+            else{
+                createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
+            }
         }
     }
+    else{
+        var position = vlinks[0];
+                
+                var attributePosition = {
+                    x: position.x + 100, 
+                    y: position.y
+                };
+                console.log("Sono in i=0");
+                var attributo = new joint.shapes.standard.Circle();
+                attributo.resize(20, 20);
+                attributo.position(attributePosition);
+                attributo.attr('root/title', 'joint.shapes.standard.Circle');
+                attributo.attr('body/fill', 'black');
+                 // Aggiungi l'attributo al grafo
+                graph.addCell(attributo);
+                createLinkBetweenEntities(attributo, vlinks[0], graph);
+    }
+    
 }
 
 function setParent(currentElementSelected, cell, graph){
