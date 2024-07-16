@@ -83,7 +83,7 @@ function addAttributeToShape(shape, graph, counter, type) {
     }
     
 }*/
-function createKeyFromLinks(vlinks, graph, linksId){
+function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
     var position = vlinks[0];
                 
     var attributePosition = {
@@ -109,16 +109,30 @@ function createKeyFromLinks(vlinks, graph, linksId){
             targetMarker: null
         }
     });
-    //escludo l'ultimo per non creare doppi passaggi sullo stesso vertice
+    /*//escludo l'ultimo per non creare doppi passaggi sullo stesso vertice
     if (vlinks.length > 2) {
         link.vertices(vlinks.slice(0, vlinks.length - 1));
-    }
+    }*/
+   link.vertices(vlinks);
 
+   //aggiungere i vertici anche ai link che vengono collegati
+   for(i=0; i<linksId.length; i++){
+        const linkToReach = graph.getCell(linksId[i]);
+        linkToReach.vertices(vlinks[i]);
+   }
+
+    
     var anchor = { name: 'connectionPerpendicular', args: { connectionPoint: 'middle' } };
     link.set('target', { id: linksId[linksId.length -1].id, selector: 'body', anchor: anchor });
     link.set('surce', { id: attributo.id, selector: 'body', anchor: anchor });
     console.log(vlinks)
     link.addTo(graph)
+
+    // Aggiungere la vista degli strumenti al collegamento
+    const linkView = link.findView(paper);
+    linkView.addTools(toolsView);
+    // Attivare la visualizzazione dei vertici
+    linkView.showTools();
 }
 
 
