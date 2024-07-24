@@ -189,9 +189,7 @@ function getShapeJSON2(cell) {
         attrs: cell.attr('label/text')       // Attributi visivi dell'elemento
     };
 
-    // Rimuovi le proprietà che non desideri includere nel JSON
-    delete baseProperties.attrs.position;
-    delete baseProperties.attrs.size;
+
 
     // Restituisci il JSON modificato
     return JSON.stringify(baseProperties, null, 2); // Opzionale: formattazione per una visualizzazione più leggibile
