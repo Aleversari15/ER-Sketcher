@@ -271,3 +271,30 @@ function updateLinkLabel(link, label) {
         alert('Seleziona un link prima di cambiare la label.');
     }
 }
+
+
+function downloadJson(graph, document){
+    console.log('Hai cliccato download');
+    var projectName = document.querySelector('.nomeProgetto').value;
+    console.log('Nome progetto:', projectName); 
+    // Imposta un nome di default se il campo è vuoto
+    if (!projectName) {
+        projectName = 'diagram_er';
+    }
+
+    console.log(projectName);
+    // Ottiengo i dati del grafo in formato JSON, li converto in stringa poi creo un blob e un url per il blob
+    var graphJSON = graph.toJSON();
+    var dataStr = JSON.stringify(graphJSON, null, 2);
+    var blob = new Blob([dataStr], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+
+    // Crea un elemento <a> temporaneo
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = projectName + '.json';
+
+    // Simula un click sul link per avviare il download
+    a.click();
+    URL.revokeObjectURL(url);
+}

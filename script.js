@@ -7,8 +7,6 @@ var coverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
 var currentElementSelected = null; 
 var linkClicked = null; // da togliere
 
-
-
 /*counters*/
 var entityCounter = 0;
 var relationCounter = 0;
@@ -53,9 +51,6 @@ const verticesTool = new joint.linkTools.Vertices({
 const toolsView = new joint.dia.ToolsView({
     tools: [verticesTool]
 });
-
-
-
 
 
 // Popola il menu a tendina con le opzioni del vettore cardinalities
@@ -294,10 +289,11 @@ selectCoverage.addEventListener('change', function() {
 });
 
 
+// Gestione del click sul bottone per il download
+document.getElementsByClassName('download')[0].addEventListener('click', function(){ 
+    downloadJson(graph, document);
+
+});
 
 
-
-})
-
-
-  
+}); 
