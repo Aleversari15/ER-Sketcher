@@ -296,4 +296,31 @@ document.getElementsByClassName('download')[0].addEventListener('click', functio
 });
 
 
+// Gestione del click sul bottone per il caricamento del file
+document.querySelector('.loadFile').addEventListener('click', function() {
+    document.getElementById('fileInput').click();
+});
+
+// Gestione del caricamento del file
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    var file = event.target.files[0];
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                var graphData = JSON.parse(e.target.result);
+                graph.fromJSON(graphData);
+            } catch (error) {
+                console.error("Errore durante il parsing del file JSON:", error);
+                alert("Errore durante il caricamento del file. Assicurati che sia un file JSON valido.");
+            }
+        };
+        reader.readAsText(file);
+    }
+});
+
+
+
+
+
 }); 
