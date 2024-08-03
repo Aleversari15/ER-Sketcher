@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function(){
 var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
@@ -6,6 +7,11 @@ var cardinalities = ['0-1', '1-1','1-N', '0-N', 'N-N', 'Altro'];
 var coverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
 var currentElementSelected = null; 
 var linkClicked = null; // da togliere
+
+//mappe che contengono info che userò per creare il json da mostrare nel pannello laterale
+var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entità associato
+var relationsMap = new Map();
+var entitiesList = [];
 
 /*counters*/
 var entityCounter = 0;
@@ -71,9 +77,6 @@ coverages.forEach(function(value) {
     selectCoverage.appendChild(option);
 });
 
-
-
-
 /*Quando l'utente clicca sul pulsante entity*/ 
 document.querySelector('.buttonDrawEntity').addEventListener('click', function(){
     entityCounter++;
@@ -118,6 +121,12 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         });
         rect.addTo(graph);
         buttonEntitySelected = false;
+
+        //creo l'oggetto che mi servirà per il json del pannello laterale
+        const entita = new Entity();
+        entita.setNome(rect.attr('label/text'));
+        entita.setId(rect.id);
+        entitiesMap.set(rect.id, entita); 
         
     }
     else if(buttonRelationSelected === true){
@@ -129,6 +138,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         diamond.attr('body/refPoints', '0,10 10,0 20,10 10,20');
         diamond.addTo(graph);
         buttonRelationSelected = false;
+        relationsMap.set(diamond.id, new Map()); //aggiungo la relazione alla mappa
     }
 });
 
@@ -148,8 +158,26 @@ paper.on('element:pointerdblclick', function(cellView) {
             createLinkBetweenEntities(selectedShapes[0], selectedShapes[1], graph);
             selectedShapes[0].attr('body/stroke', 'purple');
             selectedShapes[1].attr('body/stroke', 'purple');
+            
+            //se la prima  shape selezionata è il rombo, prendo il suo id, lo recupero dalla mappa delle relazioni e aggiungo la seconda figura tra gli oggetti associati.
+            if(selectedShapes[0].attributes.type === 'standard.Polygon'){
+                var innerMap = relationsMap.get(selectedShapes[0].id);
+                if(!innerMap.has(selectedShapes[1].id)){
+                    innerMap.set(selectedShapes[1].id, '1-N');
+                    console.log(innerMap.get(selectedShapes[1].id));
+                }
+            
+            }else{
+                var innerMap = relationsMap.get(selectedShapes[1].id);
+                if(!innerMap.has(selectedShapes[0].id)){
+                    innerMap.set(selectedShapes[0].id, '1-N');
+                    console.log(innerMap.get(selectedShapes[0].id));
+                }
+            }  
+
             selectedShapes = []; //svuoto il vettore delle entità selezionate
             buttonConnectSelected = false; //deselezione il pulsante per le relations
+
         }
     }
     //se la selezione è attiva e clicco su un rettangolo
@@ -165,7 +193,8 @@ paper.on('element:pointerdblclick', function(cellView) {
 //Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
 document.querySelector('.openJSON').addEventListener('click', function(){
     //inserisco le info nel pannello 
-    updateJSONList(graph);
+    createJsonForPanel(graph, document, entitiesMap);
+    //updateJSONList(graph);
     //rendo il pannello visibile
     document.getElementById("mySidepanel").style.width = "500px"; 
     
@@ -204,7 +233,7 @@ document.getElementsByClassName('key-button')[0].addEventListener('click', funct
 
 document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal');
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal', entitiesMap, relationsMap); //modificare
     shapeClicked = null;
 })
 
@@ -215,7 +244,7 @@ document.getElementsByClassName('cardinality')[0].addEventListener('click', func
 
 document.getElementsByClassName('subAttribute')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute');
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute'); //modificare
     shapeClicked = null;
 })
 
@@ -235,7 +264,7 @@ paper.on('link:pointerdblclick', function(linkView) {
 paper.on('blank:pointerclick', function(){
     if(selecting === true){
         //disegno il link
-        createKeyFromLinks(links, graph, linksId, paper, toolsView)
+        createKeyFromLinks(links, graph, linksId, paper, toolsView) //modificare
         selecting = false; 
         links=[];
     }
@@ -275,7 +304,7 @@ paper.on('link:pointerclick', function(linkView) {
 // Gestisce il cambio del valore del menu a tendina per la cardinalità
 selectCardinality.addEventListener('change', function() {
     var value = selectCardinality.value;
-    updateLinkLabel(linkClicked, value);
+    updateLinkLabel(linkClicked, value); //modificare
     linkClicked = null;
     shapeClicked= null;
 });
@@ -283,7 +312,7 @@ selectCardinality.addEventListener('change', function() {
 // Gestisce il cambio del valore del menu a tendina per la copertura della gerarchia
 selectCoverage.addEventListener('change', function() {
     var value = selectCoverage.value;
-    updateLinkLabel(linkClicked, value);
+    updateLinkLabel(linkClicked, value); //modificare
     linkClicked = null;
     shapeClicked= null;
 });

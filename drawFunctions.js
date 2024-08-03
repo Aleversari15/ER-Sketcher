@@ -1,5 +1,5 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
-function addAttributeToShape(shape, graph, counter, type) {
+function addAttributeToShape(shape, graph, counter, type, entitiesMap, relationsMap) {
     // Ottieni la posizione della shape
     var position = shape.position();
     
@@ -32,57 +32,28 @@ function addAttributeToShape(shape, graph, counter, type) {
 
     createLinkBetweenEntities(attributo, shape, graph);
 
+    if(shape.attributes.type === 'standard.Polygon'){
+        if (!relationsMap.has(shape.id)) {
+            relationsMap.set(shape.id, []);
+        }
+        var obj = relationsMap.get(shape.id);
+        obj.push(attributo.id, ''); //metto la stringa vuota perchè c'è la possibilità che l'utente assegni una cardinalità all'attributo.
+
+    }
+    else if (shape.attributes.type === 'standard.Rectangle'){
+        if (!entitiesMap.has(shape.id)) {
+            entitiesMap.set(shape.id, []);
+        }
+        var obj = entitiesMap.get(shape.id);
+        obj.push(attributo.id, ''); //metto la stringa vuota perchè c'è la possibilità che l'utente assegni una cardinalità all'attributo.
+    }
+    else if (shape.attributes.type === 'standard.Ellipse'){
+        //TO DO: caso il cui stiamo aggiungendo un sub attributo 
+    }
+
 }
 
 
-//funzione per creare un attributo composto o un identificatore esterno
-/*function createKeyFromLinks(vlinks, graph){
-    if(vlinks.length > 1){
-        for(i=0; i<(vlinks.length-1); i++){
-            //se è il primo link creo un attributo, altrimenti solo un link
-            if(i===0){
-                var position = vlinks[i];
-                
-                var attributePosition = {
-                    x: position.x + 100, 
-                    y: position.y
-                };
-                console.log("Sono in i=0");
-                var attributo = new joint.shapes.standard.Circle();
-                attributo.resize(20, 20);
-                attributo.position(attributePosition);
-                attributo.attr('root/title', 'joint.shapes.standard.Circle');
-                attributo.attr('body/fill', 'black');
-                 // Aggiungi l'attributo al grafo
-                graph.addCell(attributo);
-    
-                createLinkBetweenEntities(attributo, vlinks[i], graph);
-                //createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
-            }
-            else{
-                createLinkBetweenEntities(vlinks[i], vlinks[i+1], graph);
-            }
-        }
-    }
-    else{
-        var position = vlinks[0];
-                
-                var attributePosition = {
-                    x: position.x + 100, 
-                    y: position.y
-                };
-                console.log("Sono in i=0");
-                var attributo = new joint.shapes.standard.Circle();
-                attributo.resize(20, 20);
-                attributo.position(attributePosition);
-                attributo.attr('root/title', 'joint.shapes.standard.Circle');
-                attributo.attr('body/fill', 'black');
-                 // Aggiungi l'attributo al grafo
-                graph.addCell(attributo);
-                createLinkBetweenEntities(attributo, vlinks[0], graph);
-    }
-    
-}*/
 function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
     var position = vlinks[0];
                 
@@ -121,7 +92,6 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
         linkToReach.vertices(vlinks[i]);
    }
 
-    
     var anchor = { name: 'connectionPerpendicular', args: { connectionPoint: 'middle' } };
     link.set('target', { id: linksId[linksId.length -1].id, selector: 'body', anchor: anchor });
     link.set('surce', { id: attributo.id, selector: 'body', anchor: anchor });
@@ -174,42 +144,6 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
     graph.addCell(link);
 }
 
-
-//GESTIONE PANNELLO JSON
-function getShapeJSON(shape) {
-    return JSON.stringify(shape.attributes, null, 4);
-}
-
-
-function getShapeJSON2(cell) {
-    // Ottieni le proprietà base dell'elemento
-    var baseProperties = {
-        type: cell.get('type'),  // Tipo dell'elemento, ad esempio 'standard.Circle', 'standard.Rectangle', ecc.
-        id: cell.id,             // ID univoco dell'elemento nel grafo
-        attrs: cell.attr('label/text')       // Attributi visivi dell'elemento
-    };
-
-
-
-    // Restituisci il JSON modificato
-    return JSON.stringify(baseProperties, null, 2); // Opzionale: formattazione per una visualizzazione più leggibile
-}
-
-function updateJSONList(graph) {
-    var jsonContainer = document.querySelector('.json-container');
-    jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
-    
-    // Itera tutte le shape nel grafo e aggiungi il JSON corrispondente alla lista
-    graph.getCells().forEach(function(cell) {
-        var jsonItem = document.createElement('li');
-        var shapeJSON = getShapeJSON2(cell);
-        jsonItem.textContent = shapeJSON;
-        jsonContainer.appendChild(jsonItem);
-       
-    });
-
-    hljs.highlightBlock(jsonContainer);
-}
 
 
 
@@ -273,28 +207,4 @@ function updateLinkLabel(link, label) {
 }
 
 
-function downloadJson(graph, document){
-    console.log('Hai cliccato download');
-    var projectName = document.querySelector('.nomeProgetto').value;
-    console.log('Nome progetto:', projectName); 
-    // Imposta un nome di default se il campo è vuoto
-    if (!projectName) {
-        projectName = 'diagram_er';
-    }
 
-    console.log(projectName);
-    // Ottiengo i dati del grafo in formato JSON, li converto in stringa poi creo un blob e un url per il blob
-    var graphJSON = graph.toJSON();
-    var dataStr = JSON.stringify(graphJSON, null, 2);
-    var blob = new Blob([dataStr], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
-
-    // Crea un elemento <a> temporaneo
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = projectName + '.json';
-
-    // Simula un click sul link per avviare il download
-    a.click();
-    URL.revokeObjectURL(url);
-}
