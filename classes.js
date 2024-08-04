@@ -7,7 +7,7 @@ class Entity {
         this.Copertura = copertura;
     }
 
-    setNome(nome) {
+    setName(nome) {
         this.Nome = nome;
     }
 
@@ -15,32 +15,32 @@ class Entity {
         this.Id = id;
     }
 
-    addAttributo(attributo) {
+    addAttribute(attributo) {
         this.Attributi.push(attributo);
     }
 
-    setAttributi(attributi) {
+    setAttributes(attributi) {
         this.Attributi = attributi;
     }
 
-    addEntitaFiglia(entitaFiglia) {
+    addGeneralizedEntity(entitaFiglia) {
         this['Entità figlie'].push(entitaFiglia);
     }
 
-    setEntitaFiglie(entitaFiglie) {
+    setGeneralizedEntity(entitaFiglie) {
         this['Entità figlie'] = entitaFiglie;
     }
 
-    setCopertura(copertura) {
+    setCoverage(copertura) {
         this.Copertura = copertura;
     }
 
     toJSON() {
         return {
             'Entità': this.Nome,
-            Id: this.Id,
-            Attributi: '{' + this.Attributi + '}',
-            'Entità figlie': '{' + this['Entità figlie'] + '}',
+            //Id: this.Id,
+            Attributi: '{ ' + this.Attributi + ' }',
+            'Entità figlie': '{ ' + this['Entità figlie'] + ' }',
             Copertura: this.Copertura
         };
     }

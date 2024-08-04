@@ -9,12 +9,13 @@ var currentElementSelected = null;
 var linkClicked = null; // da togliere
 
 //mappe che contengono info che userò per creare il json da mostrare nel pannello laterale
-var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entità associato
+var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
 var relationsMap = new Map();
-var entitiesList = [];
 
-/*counters*/
-var entityCounter = 0;
+var attributeEntitity = new Map(); //chiave: id  shape attributo, elem: id shape di appartenenza (può essere rettangolo, rombo o ellisse)
+
+/*counters: alcuni counters andranno rimossi, basta controllare la lunghezza delle mappe*/
+var entityCounter = 0; 
 var relationCounter = 0;
 var attributesCounter = 0;
 
@@ -68,7 +69,7 @@ cardinalities.forEach(function(value) {
     selectCardinality.appendChild(option);
 });
 
-
+// Popola il menu a tendina con le opzioni del vettore coverage (coperture della gerarchia)
 var selectCoverage =  document.getElementsByClassName('coverage')[0];
 coverages.forEach(function(value) {
     var option = document.createElement('option');
@@ -94,8 +95,6 @@ document.querySelector('.buttonConnect').addEventListener('click', function(){
     relationCounter++;
     buttonConnectSelected = true;
 })
-
-
 
 
 /*Quando l'utente clicca sul riquadro per il disegno dopo aver selezionato il bottone entity*/ 
@@ -124,7 +123,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
 
         //creo l'oggetto che mi servirà per il json del pannello laterale
         const entita = new Entity();
-        entita.setNome(rect.attr('label/text'));
+        entita.setName(rect.attr('label/text'));
         entita.setId(rect.id);
         entitiesMap.set(rect.id, entita); 
         
@@ -222,7 +221,7 @@ document.getElementsByClassName('delete-button')[0].addEventListener('click', fu
 
 document.getElementsByClassName('rename-button')[0].addEventListener('click', function() {
     console.log(shapeClicked);
-    renameShape(shapeClicked);
+    renameShape(shapeClicked, entitiesMap);
     shapeClicked = null;
 });
 
@@ -233,7 +232,7 @@ document.getElementsByClassName('key-button')[0].addEventListener('click', funct
 
 document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal', entitiesMap, relationsMap); //modificare
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal', entitiesMap, relationsMap, attributeEntitity); //modificare
     shapeClicked = null;
 })
 
@@ -244,7 +243,7 @@ document.getElementsByClassName('cardinality')[0].addEventListener('click', func
 
 document.getElementsByClassName('subAttribute')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute'); //modificare
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute', entitiesMap, relationsMap, attributeEntitity); //modificare
     shapeClicked = null;
 })
 

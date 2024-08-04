@@ -1,11 +1,12 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
-function addAttributeToShape(shape, graph, counter, type, entitiesMap, relationsMap) {
+function addAttributeToShape(shape, graph, counter, type, entitiesMap, relationsMap, attributeEntity) {
     // Ottieni la posizione della shape
     var position = shape.position();
     
+    //TO DO: correggere posizionamento attributo 
     var attributePosition = {
-        x: position.x + 10, 
-        y: position.y - 10
+        x: (position.x - 50), 
+        y: (position.y - 10)
     };
 
     console.log('Shape position:',position)
@@ -24,7 +25,7 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
     attributo.position(attributePosition);
     attributo.attr('root/title', 'joint.shapes.standard.Circle');
     attributo.attr('body/fill', 'white');
-    attributo.attr('label/text', 'attributo'+counter);
+    attributo.attr('label/text', 'attributo'+ counter);
    
 
     // Aggiungi l'attributo al grafo
@@ -32,20 +33,17 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
 
     createLinkBetweenEntities(attributo, shape, graph);
 
+    //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
+    shape.embed(attributo);
+
     if(shape.attributes.type === 'standard.Polygon'){
-        if (!relationsMap.has(shape.id)) {
-            relationsMap.set(shape.id, []);
-        }
-        var obj = relationsMap.get(shape.id);
-        obj.push(attributo.id, ''); //metto la stringa vuota perchè c'è la possibilità che l'utente assegni una cardinalità all'attributo.
+        
 
     }
     else if (shape.attributes.type === 'standard.Rectangle'){
-        if (!entitiesMap.has(shape.id)) {
-            entitiesMap.set(shape.id, []);
-        }
-        var obj = entitiesMap.get(shape.id);
-        obj.push(attributo.id, ''); //metto la stringa vuota perchè c'è la possibilità che l'utente assegni una cardinalità all'attributo.
+        var entity = entitiesMap.get(shape.id);
+        entity.addAttribute(attributo.attr('label/text'));
+        attributeEntity.set(attributo.id, shape.id);
     }
     else if (shape.attributes.type === 'standard.Ellipse'){
         //TO DO: caso il cui stiamo aggiungendo un sub attributo 
@@ -142,6 +140,8 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
         }
     });
     graph.addCell(link);
+
+    //aggiungere cardinalità di default 1-N
 }
 
 
@@ -171,6 +171,7 @@ function hideCommandPalette() {
 
 function setKey(shape){
     shape.attr('body/fill', 'black');
+
 }
 
 function deleteShape(shape) {
@@ -180,11 +181,15 @@ function deleteShape(shape) {
     hideCommandPalette();
 }
 
-function renameShape(shape) {
+function renameShape(shape, entities) {
     if (shape) {
         var newName = prompt("Inserisci il nuovo nome:");
         if (newName) {
             shape.attr('label/text', newName);
+            if(entities.has(shape.id)){
+                var entity = entities.get(shape.id);
+                entity.setName(newName);
+            }  
         }
     }
     hideCommandPalette();

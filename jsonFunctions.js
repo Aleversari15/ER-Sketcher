@@ -3,6 +3,7 @@ function createJsonForPanel(graph, document, entities/*, relationships, generali
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
 
+    /*
     //stampo tutte le entità nel pannello del json
     entities.forEach((objEntity, idPrincipale) => {
         var jsonItem = document.createElement('li');
@@ -10,10 +11,48 @@ function createJsonForPanel(graph, document, entities/*, relationships, generali
         var jsonString = JSON.stringify(shapeJSON, null, 2); // Converti l'oggetto in una stringa JSON formattata
         jsonItem.textContent = jsonString;
         jsonContainer.appendChild(jsonItem);
-    });
+    });*/
+
+
+    var json = getHierarchicalJSON(graph);
+    jsonContainer.innerHTML = JSON.stringify(json, null, 2);
+
 
     hljs.highlightBlock(jsonContainer);
 }
+
+// Funzione per ottenere una rappresentazione gerarchica delle celle in formato JSON
+function getHierarchicalJSON(graph) {
+    var cells = graph.getCells();
+    var hierarchy = [];
+
+    cells.forEach(function(cell) {
+        if (cell.get('embeds') && cell.get('embeds').length > 0) {
+            if(cell.attributes.type ===  'standard.Rectangle'){
+                var parent = {
+                    Entity: cell.attr('label/text'), // o 'label' a seconda di come hai nominato l'attributo
+                    Attributes: []
+                };
+            
+    
+                cell.get('embeds').forEach(function(childId) {
+                    var child = graph.getCell(childId);
+                    if (child) {
+                        parent.Attributes.push({
+                            Attribute: child.attr('label/text') // o 'label' a seconda di come hai nominato l'attributo
+                        });
+                    }
+                });
+    
+                hierarchy.push(parent);
+            
+            }
+        }
+    });
+
+    return hierarchy;
+}
+
 
 
 function downloadJson(graph, document){
