@@ -88,11 +88,17 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
    for(i=0; i<linksId.length; i++){
         const linkToReach = graph.getCell(linksId[i]);
         linkToReach.vertices(vlinks[i]);
+        
    }
 
+    //TO DO: correggere, devo settare il nuovo attributo come figlio dell'entità che contiene i vari link 
+    linksId[0].getSourceCell().getParentCell().embed(attributo); //li setto tutti come genitori del link appena creato, così il suo spostamento e la sua esistenza dipende da loro
+    
+
+    //TO FIX non riconosce il nome dell'anchor
     var anchor = { name: 'connectionPerpendicular', args: { connectionPoint: 'middle' } };
     link.set('target', { id: linksId[linksId.length -1].id, selector: 'body', anchor: anchor });
-    link.set('surce', { id: attributo.id, selector: 'body', anchor: anchor });
+    link.set('source', { id: attributo.id, selector: 'body', anchor: anchor });
     console.log(vlinks)
     link.addTo(graph)
 

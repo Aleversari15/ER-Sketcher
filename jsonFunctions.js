@@ -17,7 +17,6 @@ function createJsonForPanel(graph, document, entities/*, relationships, generali
     var json = getHierarchicalJSON(graph);
     jsonContainer.innerHTML = JSON.stringify(json, null, 2);
 
-
     hljs.highlightBlock(jsonContainer);
 }
 
@@ -30,22 +29,25 @@ function getHierarchicalJSON(graph) {
         if (cell.get('embeds') && cell.get('embeds').length > 0) {
             if(cell.attributes.type ===  'standard.Rectangle'){
                 var parent = {
-                    Entity: cell.attr('label/text'), // o 'label' a seconda di come hai nominato l'attributo
+                    Entity: cell.attr('label/text'), 
                     Attributes: []
                 };
             
-    
                 cell.get('embeds').forEach(function(childId) {
                     var child = graph.getCell(childId);
                     if (child) {
+                        var childText = child.attr('label/text');
+                        // Aggiungi la condizione per controllare il colore del riempimento del corpo
+                        if (child.attr('body/fill') === 'black') {
+                            childText += ` (id)`;
+                        }
                         parent.Attributes.push({
-                            Attribute: child.attr('label/text') // o 'label' a seconda di come hai nominato l'attributo
+                            Attribute: childText
                         });
                     }
                 });
     
                 hierarchy.push(parent);
-            
             }
         }
     });
