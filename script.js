@@ -188,10 +188,7 @@ paper.on('element:pointerdblclick', function(cellView) {
 
 //Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
 document.querySelector('.openJSON').addEventListener('click', function(){
-    //inserisco le info nel pannello 
-    createJsonForPanel(graph, document, relationsMap);
-    //updateJSONList(graph);
-    //rendo il pannello visibile
+    createJsonForPanel(graph, document, relationsMap, hierarchyMap);
     document.getElementById("mySidepanel").style.width = "500px"; 
     
 });

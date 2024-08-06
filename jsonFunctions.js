@@ -1,9 +1,9 @@
 
-function createJsonForPanel(graph, document, relationsMap){
+function createJsonForPanel(graph, document, relationsMap, hierarchyMap){
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
 
-    var json = getHierarchicalJSON(graph, relationsMap);
+    var json = getHierarchicalJSON(graph, relationsMap, hierarchyMap);
     jsonContainer.innerHTML = JSON.stringify(json, null, 2);
 
 
@@ -12,14 +12,14 @@ function createJsonForPanel(graph, document, relationsMap){
 
 
 // Funzione per ottenere una rappresentazione gerarchica delle celle in formato JSON
-function getHierarchicalJSON(graph, relationsMap) {
+function getHierarchicalJSON(graph, relationsMap,hierarchyMap) {
     var cells = graph.getCells();
     var hierarchy = [];
 
     cells.forEach(function(cell) {
-
+        var parent = null;
         if (cell.get('embeds') && cell.get('embeds').length > 0) {
-            var parent = null;
+            
             if(cell.attributes.type ===  'standard.Rectangle'){
                 parent = {
                     Entity: cell.attr('label/text'), 
@@ -64,10 +64,30 @@ function getHierarchicalJSON(graph, relationsMap) {
                     });
                 } 
             }
-            hierarchy.push(parent);
+            
         }
+        
+        const generalization = hierarchyMap.get(cell.id);
+       
+            if (generalization) {
+
+                parent = {
+                    Entity: cell.attr('label/text'), 
+                    Entities_generalized: []
+                };
+                const entitiesGeneralized = generalization.getAllEntityGeneralizations();
+                entitiesGeneralized.forEach(([entity, coverage]) => {
+                    parent.Entities_generalized.push({
+                    Entity: entity.attr('label/text'),
+                    Coverage: coverage
+                    });
+                });
+            } 
+
+            hierarchy.push(parent);
     });
 
+    
     return hierarchy;
 }
 
