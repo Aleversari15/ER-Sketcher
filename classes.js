@@ -73,4 +73,21 @@ class Association {
     getAllEntityConnections() {
         return Array.from(this.entitiesConnected.entries());
     }
+
+    setCardinalityForEntityById(entityId, newCardinality) {
+        const validCardinalities = ['0-1', '1-1', '1-N', '0-N', 'N-N', 'Altro'];
+        if (!validCardinalities.includes(newCardinality)) {
+            console.warn(`Invalid cardinality: ${newCardinality}`);
+            return false;
+        }
+
+        for (let [cell, cardinality] of this.entitiesConnected.entries()) {
+            if (cell.id === entityId) {
+                this.entitiesConnected.set(cell, newCardinality);
+                return true;
+            }
+        }
+        console.warn(`Entity with ID: ${entityId} not found.`);
+        return false;
+    }
 }

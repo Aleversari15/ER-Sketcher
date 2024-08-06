@@ -198,7 +198,7 @@ function renameShape(shape, entities) {
 
 
 // Funzione per aggiornare la label del link in base alla scelta della cardinalità
-function updateLinkLabel(link, label) {
+function updateLinkLabel(link, label,relationsMap) {
     if (link) {
         link.label(0, {
             position: 0.5,
@@ -207,6 +207,27 @@ function updateLinkLabel(link, label) {
             }
         });
         console.log('Label del link cambiata in:', label);
+        
+        var associations = null;
+        var childToUpload = null;
+        //se l'id della cella source è contenuto nella mappa, allora è l'associazione e possiamo prendere il suo oggetto associato e aggiornare la label per il json
+        if(relationsMap.get(link.getSourceCell().id)){
+            associations = relationsMap.get(link.getSourceCell().id);
+            childToUpload = link.getTargetCell();
+        }
+        else if(relationsMap.get(link.getTargetCell().id)){
+            associations = relationsMap.get(link.getTargetCell().id);
+            childToUpload = link.getSourceCell();
+        }
+        //se l'oggetto non è vuoto e quindi stiamo aggiornando la cardinalità di un'associazione 
+        if (associations) {
+            const entityConnections = associations.getAllEntityConnections();
+            entityConnections.forEach(([entity, cardinality]) => {
+               if(entity.id === childToUpload.id){
+                associations.setCardinalityForEntityById(childToUpload.id, label);
+               }
+            });
+        } 
     } else {
         alert('Seleziona un link prima di cambiare la label.');
     }
