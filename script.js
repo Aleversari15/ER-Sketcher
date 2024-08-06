@@ -119,13 +119,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
             }
         });
         rect.addTo(graph);
-        buttonEntitySelected = false;
-
-        //creo l'oggetto che mi servirà per il json del pannello laterale
-        const entita = new Entity();
-        entita.setName(rect.attr('label/text'));
-        entita.setId(rect.id);
-        entitiesMap.set(rect.id, entita); 
+        buttonEntitySelected = false; 
         
     }
     else if(buttonRelationSelected === true){
@@ -137,7 +131,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         diamond.attr('body/refPoints', '0,10 10,0 20,10 10,20');
         diamond.addTo(graph);
         buttonRelationSelected = false;
-        relationsMap.set(diamond.id, new Map()); //aggiungo la relazione alla mappa
+        relationsMap.set(diamond.id, new Association(diamond.attr('label/text'))); //aggiungo la relazione alla mappa
     }
 });
 
@@ -158,20 +152,14 @@ paper.on('element:pointerdblclick', function(cellView) {
             selectedShapes[0].attr('body/stroke', 'purple');
             selectedShapes[1].attr('body/stroke', 'purple');
             
-            //se la prima  shape selezionata è il rombo, prendo il suo id, lo recupero dalla mappa delle relazioni e aggiungo la seconda figura tra gli oggetti associati.
+            //riempio la mappa che mi servirà per il json del pannello laterale
             if(selectedShapes[0].attributes.type === 'standard.Polygon'){
-                var innerMap = relationsMap.get(selectedShapes[0].id);
-                if(!innerMap.has(selectedShapes[1].id)){
-                    innerMap.set(selectedShapes[1].id, '1-N');
-                    console.log(innerMap.get(selectedShapes[1].id));
-                }
-            
+                var association = relationsMap.get(selectedShapes[0].id);
+                association.addEntityConnection(selectedShapes[1], '1-N');
+                
             }else{
-                var innerMap = relationsMap.get(selectedShapes[1].id);
-                if(!innerMap.has(selectedShapes[0].id)){
-                    innerMap.set(selectedShapes[0].id, '1-N');
-                    console.log(innerMap.get(selectedShapes[0].id));
-                }
+                var association = relationsMap.get(selectedShapes[1].id);
+                association.addEntityConnection(selectedShapes[0], '1-N');
             }  
 
             selectedShapes = []; //svuoto il vettore delle entità selezionate
@@ -192,7 +180,7 @@ paper.on('element:pointerdblclick', function(cellView) {
 //Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
 document.querySelector('.openJSON').addEventListener('click', function(){
     //inserisco le info nel pannello 
-    createJsonForPanel(graph, document, entitiesMap);
+    createJsonForPanel(graph, document, relationsMap);
     //updateJSONList(graph);
     //rendo il pannello visibile
     document.getElementById("mySidepanel").style.width = "500px"; 

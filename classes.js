@@ -45,3 +45,32 @@ class Entity {
         };
     }
 }
+
+//classe utile per salvare le informazioni riguardanti le associazioni e le varie entità e cardinalità 
+class Association {
+    constructor(name) {
+        this.name = name;
+        this.entitiesConnected = new Map();
+    }
+
+    addEntityConnection(cell, cardinality) {
+        const validCardinalities = ['0-1', '1-1', '1-N', '0-N', 'N-N', 'Altro'];
+        if (validCardinalities.includes(cardinality)) {
+            this.entitiesConnected.set(cell, cardinality);
+        } else {
+            console.warn(`Invalid cardinality: ${cardinality}`);
+        }
+    }
+
+    getEntityConnection(cell) {
+        return this.entitiesConnected.get(cell);
+    }
+
+    removeEntityConnection(cell) {
+        this.entitiesConnected.delete(cell);
+    }
+
+    getAllEntityConnections() {
+        return Array.from(this.entitiesConnected.entries());
+    }
+}

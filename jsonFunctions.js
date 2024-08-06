@@ -1,5 +1,5 @@
 
-function createJsonForPanel(graph, document, entities/*, relationships, generalizations*/){
+function createJsonForPanel(graph, document, relationsMap){
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
 
@@ -14,7 +14,7 @@ function createJsonForPanel(graph, document, entities/*, relationships, generali
     });*/
 
 
-    var json = getHierarchicalJSON(graph);
+    var json = getHierarchicalJSON(graph, relationsMap);
     jsonContainer.innerHTML = JSON.stringify(json, null, 2);
 
 
@@ -22,15 +22,17 @@ function createJsonForPanel(graph, document, entities/*, relationships, generali
 }
 
 // Funzione per ottenere una rappresentazione gerarchica delle celle in formato JSON
-function getHierarchicalJSON(graph) {
+function getHierarchicalJSON(graph, relationsMap) {
     var cells = graph.getCells();
     var hierarchy = [];
 
     cells.forEach(function(cell) {
+
         if (cell.get('embeds') && cell.get('embeds').length > 0) {
+            var parent = null;
             if(cell.attributes.type ===  'standard.Rectangle'){
-                var parent = {
-                    Entity: cell.attr('label/text'), // o 'label' a seconda di come hai nominato l'attributo
+                parent = {
+                    Entity: cell.attr('label/text'), 
                     Attributes: []
                 };
             
@@ -39,14 +41,41 @@ function getHierarchicalJSON(graph) {
                     var child = graph.getCell(childId);
                     if (child) {
                         parent.Attributes.push({
-                            Attribute: child.attr('label/text') // o 'label' a seconda di come hai nominato l'attributo
+                            Attribute: child.attr('label/text') 
                         });
                     }
                 });
-    
-                hierarchy.push(parent);
-            
             }
+            else if(cell.attributes.type ===  'standard.Polygon'){
+                var parent = {
+                    Relation: cell.attr('label/text'), 
+                    Attributes: [],
+                    Entities_connected: []
+                };
+
+                cell.get('embeds').forEach(function(childId) {
+                    var child = graph.getCell(childId);
+                    if (child) {
+                        parent.Attributes.push({
+                            Attribute: child.attr('label/text') 
+                        });
+                    }
+                });
+
+                const association = relationsMap.get(cell.id);
+
+                if (association) {
+                    const entityConnections = association.getAllEntityConnections();
+                    entityConnections.forEach(([entity, cardinality]) => {
+                        parent.Entities_connected.push({
+                            Entity: entity.attr('label/text'),
+                            Cardinality: cardinality
+                        });
+                    });
+                } 
+                
+            }
+            hierarchy.push(parent);
         }
     });
 

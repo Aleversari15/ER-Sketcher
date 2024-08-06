@@ -36,19 +36,6 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
     shape.embed(attributo);
 
-    if(shape.attributes.type === 'standard.Polygon'){
-        
-
-    }
-    else if (shape.attributes.type === 'standard.Rectangle'){
-        var entity = entitiesMap.get(shape.id);
-        entity.addAttribute(attributo.attr('label/text'));
-        attributeEntity.set(attributo.id, shape.id);
-    }
-    else if (shape.attributes.type === 'standard.Ellipse'){
-        //TO DO: caso il cui stiamo aggiungendo un sub attributo 
-    }
-
 }
 
 
@@ -144,9 +131,18 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
             targetMarker: null
         }
     });
-    graph.addCell(link);
 
-    //aggiungere cardinalità di default 1-N
+    //se sto collegando un'associazione ad un'entità allora imposto anche una cardinalità di default 
+    if((shape1.type === 'standard.Rectangle' && shape2.type === 'standard.Polygon') || 
+        (shape2.type === 'standard.Rectangle' && shape1.type === 'standard.Polygon')){
+        link.label(0, {
+            position: 0.5,
+            attrs: {
+                text: { text: '1-N' }
+            }
+        });
+    }
+    graph.addCell(link);
 }
 
 
