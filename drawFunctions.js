@@ -1,16 +1,5 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
 function addAttributeToShape(shape, graph, counter, type, entitiesMap, relationsMap, attributeEntity) {
-    // Ottieni la posizione della shape
-    var position = shape.position();
-    
-    //TO DO: correggere posizionamento attributo 
-    var attributePosition = {
-        x: (position.x - 50), 
-        y: (position.y - 10)
-    };
-
-    console.log('Shape position:',position)
-    console.log('Attribute position:', attributePosition);
 
     if(type === 'normal'){
         var attributo = new joint.shapes.standard.Circle();
@@ -22,7 +11,7 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
         attributo.resize(70, 40);
     }
     
-    attributo.position(attributePosition);
+    attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - 100);
     attributo.attr('root/title', 'joint.shapes.standard.Circle');
     attributo.attr('body/fill', 'white');
     attributo.attr('label/text', 'attributo'+ counter);
@@ -95,8 +84,8 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
     linkView.showTools();
 }
 
-
-function setParent(currentElementSelected, cell, graph){
+//metodo che permette di settare il padre di un'entita
+function setParent(currentElementSelected, cell, graph, coverage){
     var link = new joint.shapes.standard.Link;
     link.source({
         id: currentElementSelected.id,
@@ -117,7 +106,46 @@ function setParent(currentElementSelected, cell, graph){
             }
         }
     });
+    link.label(0, {
+        position: 0.5,
+        attrs: {
+            text: { text: coverage } // Esempio di etichetta di cardinalità
+        }
+    });
     graph.addCell(link);
+}
+
+function createBranchingLinks(parentShape, generalizedEnititesMap, graph, coverage) {
+    const entityGeneralized = generalizedEnititesMap.getAllEntityGeneralizations();
+
+    //salvo l'hub così che se aggiungo altre entità figlie in seguito, utilizzano lo stesso punto d'incontro 
+    var hub = generalizedEnititesMap.getHub();
+    if(!hub){
+        hub = new joint.shapes.standard.Circle();
+        hub.position(parentShape.position().x + 200, parentShape.position().y + 100);
+        hub.resize(10, 10); // Piccolo nodo
+        hub.attr({
+            body: { fill: 'red' },
+            label: { text: '', fill: 'white' }
+        });
+        generalizedEnititesMap.setHub(hub);
+        graph.addCell(hub);
+        setParent(hub, parentShape,graph,coverage); //disegno la connessione tra hub e padre solo la prima volta
+    }
+   
+    
+
+    entityGeneralized.forEach(([entity, coverage]) => {
+        var linkToChild = new joint.shapes.standard.Link();
+        linkToChild.source(hub);
+        linkToChild.target(entity);
+        linkToChild.attr({
+            line: {
+                targetMarker: null // Personalizza il marker di destinazione se necessario
+            }
+        });
+        graph.addCell(linkToChild);
+    });   
 }
 
 

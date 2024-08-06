@@ -11,7 +11,7 @@ var linkClicked = null; // da togliere
 //mappe che contengono info che userò per creare il json da mostrare nel pannello laterale
 var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
 var relationsMap = new Map();
-
+var hierarchyMap = new Map();
 var attributeEntitity = new Map(); //chiave: id  shape attributo, elem: id shape di appartenenza (può essere rettangolo, rombo o ellisse)
 
 /*counters: alcuni counters andranno rimossi, basta controllare la lunghezza delle mappe*/
@@ -170,7 +170,14 @@ paper.on('element:pointerdblclick', function(cellView) {
     //se la selezione è attiva e clicco su un rettangolo
     else if(selecting && (cell.isElement() && (cell.attributes.type === 'standard.Rectangle'))){
         //metodo che dato un'entità figlia e una padre, crea la gerarchia
-        setParent(currentElementSelected, cell, graph); 
+
+        //setParent(currentElementSelected, cell, graph, hierarchyMap); 
+        hierarchyMap.set(cell.id, new Generalization());
+        var gen = hierarchyMap.get(cell.id);
+        gen.addEntityGeneralization(currentElementSelected, '(t,e)');
+
+        //controllare
+        createBranchingLinks(cell, hierarchyMap.get(cell.id), graph, '(t,e)');
         selecting = false; 
 
     }
