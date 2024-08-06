@@ -61,6 +61,7 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
     };
 
     console.log(attributePosition);
+
     var attributo = new joint.shapes.standard.Circle();
                 attributo.resize(20, 20);
                 attributo.position(attributePosition);
@@ -69,6 +70,7 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
                 graph.addCell(attributo);
 
     var endLink = vlinks[vlinks.length-1];
+
     var link = new joint.shapes.standard.Link();
     link.source(attributo);
     link.target(endLink);
@@ -89,6 +91,9 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
         const linkToReach = graph.getCell(linksId[i]);
         linkToReach.vertices(vlinks[i]);
    }
+   //setto l'entità padre anche per l'attributo appena creato
+    console.log("Primo link selezionato ha come padre: ", graph.getCell(linksId[0]).getSourceCell().getParentCell().attr('label/text'));
+    graph.getCell(linksId[0]).getSourceCell().getParentCell().embed(attributo);
 
     var anchor = { name: 'connectionPerpendicular', args: { connectionPoint: 'middle' } };
     link.set('target', { id: linksId[linksId.length -1].id, selector: 'body', anchor: anchor });

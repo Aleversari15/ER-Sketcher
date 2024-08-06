@@ -90,7 +90,7 @@ document.querySelector('.buttonRelation').addEventListener('click', function(){
     buttonRelationSelected = true;
 })
 
-//Quando l'utente clicca sul bottone relation
+//Quando l'utente clicca sul bottone Connect
 document.querySelector('.buttonConnect').addEventListener('click', function(){
     relationCounter++;
     buttonConnectSelected = true;
@@ -263,7 +263,7 @@ paper.on('link:pointerdblclick', function(linkView) {
 paper.on('blank:pointerclick', function(){
     if(selecting === true){
         //disegno il link
-        createKeyFromLinks(links, graph, linksId, paper, toolsView) //modificare
+        createKeyFromLinks(links, graph, linksId, paper, toolsView); //modificare
         selecting = false; 
         links=[];
     }
