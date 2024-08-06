@@ -3,23 +3,13 @@ function createJsonForPanel(graph, document, relationsMap){
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
 
-    /*
-    //stampo tutte le entità nel pannello del json
-    entities.forEach((objEntity, idPrincipale) => {
-        var jsonItem = document.createElement('li');
-        var shapeJSON = objEntity.toJSON();
-        var jsonString = JSON.stringify(shapeJSON, null, 2); // Converti l'oggetto in una stringa JSON formattata
-        jsonItem.textContent = jsonString;
-        jsonContainer.appendChild(jsonItem);
-    });*/
-
-
     var json = getHierarchicalJSON(graph, relationsMap);
     jsonContainer.innerHTML = JSON.stringify(json, null, 2);
 
 
     hljs.highlightBlock(jsonContainer);
 }
+
 
 // Funzione per ottenere una rappresentazione gerarchica delle celle in formato JSON
 function getHierarchicalJSON(graph, relationsMap) {
@@ -73,7 +63,6 @@ function getHierarchicalJSON(graph, relationsMap) {
                         });
                     });
                 } 
-                
             }
             hierarchy.push(parent);
         }
@@ -123,12 +112,10 @@ function getShapeJSON2(cell) {
         id: cell.id,             // ID univoco dell'elemento nel grafo
         attrs: cell.attr('label/text')       // Attributi visivi dell'elemento
     };
-
-
-
     // Restituisci il JSON modificato
     return JSON.stringify(baseProperties, null, 2); // Opzionale: formattazione per una visualizzazione più leggibile
 }
+
 
 function updateJSONList(graph) {
     var jsonContainer = document.querySelector('.json-container');

@@ -133,8 +133,8 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
     });
 
     //se sto collegando un'associazione ad un'entità allora imposto anche una cardinalità di default 
-    if((shape1.type === 'standard.Rectangle' && shape2.type === 'standard.Polygon') || 
-        (shape2.type === 'standard.Rectangle' && shape1.type === 'standard.Polygon')){
+    if((shape1.attributes.type === 'standard.Rectangle' && shape2.attributes.type === 'standard.Polygon') || 
+        (shape2.attributes.type === 'standard.Rectangle' && shape1.attributes.type === 'standard.Polygon')){
         link.label(0, {
             position: 0.5,
             attrs: {
