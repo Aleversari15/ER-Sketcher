@@ -172,7 +172,9 @@ paper.on('element:pointerdblclick', function(cellView) {
         //metodo che dato un'entità figlia e una padre, crea la gerarchia
 
         //setParent(currentElementSelected, cell, graph, hierarchyMap); 
-        hierarchyMap.set(cell.id, new Generalization());
+        if(!hierarchyMap.get(cell.id)){
+            hierarchyMap.set(cell.id, new Generalization());
+        }
         var gen = hierarchyMap.get(cell.id);
         gen.addEntityGeneralization(currentElementSelected, '(t,e)');
 

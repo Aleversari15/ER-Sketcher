@@ -113,6 +113,8 @@ function createBranchingLinks(parentShape, generalizedEnititesMap, graph, covera
 
     //salvo l'hub così che se aggiungo altre entità figlie in seguito, utilizzano lo stesso punto d'incontro 
     var hub = generalizedEnititesMap.getHub();
+    console.log("Hub salvato: ", hub);
+
     if(!hub){
         hub = new joint.shapes.standard.Circle();
         hub.position(parentShape.position().x + 200, parentShape.position().y + 100);
@@ -121,23 +123,29 @@ function createBranchingLinks(parentShape, generalizedEnititesMap, graph, covera
             body: { fill: 'red' },
             label: { text: '', fill: 'white' }
         });
+        console.log("Hub creato: ", hub);
         generalizedEnititesMap.setHub(hub);
         graph.addCell(hub);
         setParent(hub, parentShape,graph,coverage); //disegno la connessione tra hub e padre solo la prima volta
     }
-   
     
-
+   
     entityGeneralized.forEach(([entity, coverage]) => {
-        var linkToChild = new joint.shapes.standard.Link();
-        linkToChild.source(hub);
-        linkToChild.target(entity);
-        linkToChild.attr({
-            line: {
-                targetMarker: null // Personalizza il marker di destinazione se necessario
-            }
-        });
-        graph.addCell(linkToChild);
+        // Controlla se esiste già un collegamento dall'hub all'entità figlia
+        const existingLinks = graph.getConnectedLinks(hub, { outbound: true });
+        const linkExists = existingLinks.some(link => link.get('target').id === entity.id);
+
+        if (!linkExists){
+            var linkToChild = new joint.shapes.standard.Link();
+            linkToChild.source(hub);
+            linkToChild.target(entity);
+            linkToChild.attr({
+                line: {
+                    targetMarker: null 
+                }
+            });
+            graph.addCell(linkToChild);
+        }
     });   
 }
 
