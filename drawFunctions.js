@@ -11,7 +11,7 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
         attributo.resize(70, 40);
     }
     
-    attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - 100);
+    attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
     attributo.attr('root/title', 'joint.shapes.standard.Circle');
     attributo.attr('body/fill', 'white');
     attributo.attr('label/text', 'attributo'+ counter);
@@ -29,18 +29,11 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
 
 
 function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
-    var position = vlinks[0];
-                
-    var attributePosition = {
-        x: position.x + 10, 
-         y: position.y
-    };
-
-    console.log(attributePosition);
-
+    var shape = graph.getCell(linksId[0]).getSourceCell().getParentCell();
+    
     var attributo = new joint.shapes.standard.Circle();
                 attributo.resize(20, 20);
-                attributo.position(attributePosition);
+                attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
                 attributo.attr('root/title', 'joint.shapes.standard.Circle');
                 attributo.attr('body/fill', 'black');
                 graph.addCell(attributo);
