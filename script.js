@@ -120,7 +120,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         });
         rect.addTo(graph);
         buttonEntitySelected = false; 
-        
+        entitiesMap.set(rect, new Entity());
     }
     else if(buttonRelationSelected === true){
         var diamond = new joint.shapes.standard.Polygon();
@@ -188,7 +188,7 @@ paper.on('element:pointerdblclick', function(cellView) {
 
 //Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
 document.querySelector('.openJSON').addEventListener('click', function(){
-    createJsonForPanel(graph, document, relationsMap, hierarchyMap);
+    createJsonForPanel(graph, document, relationsMap, hierarchyMap,entitiesMap);
     document.getElementById("mySidepanel").style.width = "500px"; 
     
 });
@@ -221,6 +221,10 @@ document.getElementsByClassName('rename-button')[0].addEventListener('click', fu
 
 document.getElementsByClassName('key-button')[0].addEventListener('click', function(){
     setKey(shapeClicked);
+    var objEntity = entitiesMap.get(shapeClicked.getParentCell());
+    var id = [];
+    id.push(shapeClicked);
+    objEntity.setId(id);
     shapeClicked = null;
 })
 
@@ -256,10 +260,18 @@ paper.on('link:pointerdblclick', function(linkView) {
 
 paper.on('blank:pointerclick', function(){
     if(selecting === true){
-        //disegno il link
         createKeyFromLinks(links, graph, linksId, paper, toolsView); //modificare
+        var entity = linksId[0].getSourceCell().getParentCell();
+        var objEntity = entitiesMap.get(entity);
+        var attributes = [];
+        linksId.forEach((l) => {
+            attributes.push(l.getSourceCell());
+        })
+        objEntity.setId(attributes);
+        
         selecting = false; 
         links=[];
+        //devo svuotare anche il vettore linkId? cambiare nome 
     }
     
 } )

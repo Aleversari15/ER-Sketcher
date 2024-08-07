@@ -1,49 +1,48 @@
 class Entity {
-    constructor(nome = '', id = '', attributi = [], entitaFiglie = [], copertura = '') {
-        this.Nome = nome;
-        this.Id = id;
-        this.Attributi = attributi;
-        this['Entità figlie'] = entitaFiglie;
-        this.Copertura = copertura;
+    constructor() {
+        this.id = [];
+        this.attributes = new Map(); //contiene ogni cella attributo e la sua cardinalità 
     }
 
-    setName(nome) {
-        this.Nome = nome;
+    // lista così posso anche salvarmi gli id composti/esterni
+    addId(id) {
+        this.id.push(id);
     }
 
-    setId(id) {
-        this.Id = id;
+    setId(ids){
+        this.id = ids; 
     }
 
-    addAttribute(attributo) {
-        this.Attributi.push(attributo);
+    getId(){
+        return this.id;
     }
 
-    setAttributes(attributi) {
-        this.Attributi = attributi;
+    addAttribute(attribute, cardinality) {
+        if(cardinality){
+            this.attributes.set(attribute, cardinality);
+        }
+        else{
+            this.attributes.set(attribute, null); //se null non dovrà essere disegnato nulla sul link 
+        }
+        
     }
 
-    addGeneralizedEntity(entitaFiglia) {
-        this['Entità figlie'].push(entitaFiglia);
+    getCardinality(attribute){
+        var card = this.attributes.get(attribute);
+        if(card){
+            return card;
+        }
     }
 
-    setGeneralizedEntity(entitaFiglie) {
-        this['Entità figlie'] = entitaFiglie;
+    setCardinality(attribute, newCardinality){
+        for (let [attributeCell, cardinality] of this.attributes.entries()) {
+            if (attributeCell.id === attribute.id) {
+                this.entitiesConnected.set(attributeCell, newCardinality);
+                return true;
+            }
+        }
     }
 
-    setCoverage(copertura) {
-        this.Copertura = copertura;
-    }
-
-    toJSON() {
-        return {
-            'Entità': this.Nome,
-            //Id: this.Id,
-            Attributi: '{ ' + this.Attributi + ' }',
-            'Entità figlie': '{ ' + this['Entità figlie'] + ' }',
-            Copertura: this.Copertura
-        };
-    }
 }
 
 //classe utile per salvare le informazioni riguardanti le associazioni e le varie entità e cardinalità 

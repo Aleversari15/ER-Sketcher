@@ -1,9 +1,9 @@
 
-function createJsonForPanel(graph, document, relationsMap, hierarchyMap){
+function createJsonForPanel(graph, document, relationsMap, hierarchyMap, entitiesMap){
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
 
-    var json = getHierarchicalJSON(graph, relationsMap, hierarchyMap);
+    var json = getHierarchicalJSON(graph, relationsMap, hierarchyMap,entitiesMap);
     jsonContainer.innerHTML = JSON.stringify(json, null, 2);
 
 
@@ -12,7 +12,7 @@ function createJsonForPanel(graph, document, relationsMap, hierarchyMap){
 
 
 // Funzione per ottenere una rappresentazione gerarchica delle celle in formato JSON
-function getHierarchicalJSON(graph, relationsMap,hierarchyMap) {
+function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
     var cells = graph.getCells();
     var hierarchy = [];
 
@@ -23,9 +23,9 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap) {
             if(cell.attributes.type ===  'standard.Rectangle'){
                 parent = {
                     Entity: cell.attr('label/text'), 
-                    Attributes: []
+                    Attributes: [],
+                    Identifier: []
                 };
-            
     
                 cell.get('embeds').forEach(function(childId) {
                     var child = graph.getCell(childId);
@@ -35,6 +35,16 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap) {
                         });
                     }
                 });
+
+                //stampo l'identificatore (singolo/composto/esterno)
+                var objEntity = entitiesMap.get(cell);
+                if(objEntity){
+                    var ids = [];
+                    objEntity.getId().forEach((idCell) => {
+                        ids.push(idCell.attr('label/text') );
+                    })
+                    parent.Identifier.push(ids);  
+                }
             }
             else if(cell.attributes.type ===  'standard.Polygon'){
                 var parent = {
@@ -64,27 +74,28 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap) {
                     });
                 } 
             }
-            
+            hierarchy.push(parent);
         }
         
         const generalization = hierarchyMap.get(cell.id);
        
-            if (generalization) {
+        if (generalization) {
 
-                parent = {
-                    Entity: cell.attr('label/text'), 
-                    Entities_generalized: []
-                };
-                const entitiesGeneralized = generalization.getAllEntityGeneralizations();
-                entitiesGeneralized.forEach(([entity, coverage]) => {
-                    parent.Entities_generalized.push({
-                    Entity: entity.attr('label/text'),
-                    Coverage: coverage
-                    });
+            parent = {
+                Entity: cell.attr('label/text'), 
+                Entities_generalized: []
+            };
+            const entitiesGeneralized = generalization.getAllEntityGeneralizations();
+            entitiesGeneralized.forEach(([entity, coverage]) => {
+                parent.Entities_generalized.push({
+                Entity: entity.attr('label/text'),
+                Coverage: coverage
                 });
-            } 
-
+            });
             hierarchy.push(parent);
+        } 
+
+        
     });
 
     
