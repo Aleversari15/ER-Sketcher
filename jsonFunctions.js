@@ -20,6 +20,7 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
         var parent = null;
         if (cell.get('embeds') && cell.get('embeds').length > 0) {
             
+            //entità 
             if(cell.attributes.type ===  'standard.Rectangle'){
                 parent = {
                     Entity: cell.attr('label/text'), 
@@ -45,13 +46,20 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
                     })
                     parent.Identifier.push(ids);  
                 }
+                hierarchy.push(parent);
             }
-            else if(cell.attributes.type ===  'standard.Polygon'){
-                var parent = {
-                    Relation: cell.attr('label/text'), 
-                    Attributes: [],
-                    Entities_connected: []
-                };
+            
+            
+        }
+        //associazioni 
+        if(cell.attributes.type ===  'standard.Polygon'){
+            var parent = {
+                Relation: cell.attr('label/text'), 
+                Attributes: [],
+                Entities_connected: []
+            };
+            //prima quelle con qualche attributo 
+            if(cell.get('embeds')){
 
                 cell.get('embeds').forEach(function(childId) {
                     var child = graph.getCell(childId);
@@ -61,22 +69,22 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
                         });
                     }
                 });
-
-                const association = relationsMap.get(cell.id);
-
-                if (association) {
-                    const entityConnections = association.getAllEntityConnections();
-                    entityConnections.forEach(([entity, cardinality]) => {
-                        parent.Entities_connected.push({
-                            Entity: entity.attr('label/text'),
-                            Cardinality: cardinality
-                        });
-                    });
-                } 
             }
+            const association = relationsMap.get(cell.id);
+
+            if (association) {
+                const entityConnections = association.getAllEntityConnections();
+                entityConnections.forEach(([entity, cardinality]) => {
+                    parent.Entities_connected.push({
+                        Entity: entity.attr('label/text'),
+                        Cardinality: cardinality
+                    });
+                });
+            } 
             hierarchy.push(parent);
         }
         
+        //gerarchie
         const generalization = hierarchyMap.get(cell.id);
        
         if (generalization) {
