@@ -1,38 +1,32 @@
 
-function createJsonForPanel(graph, document, entities/*, relationships, generalizations*/){
+function createJsonForPanel(graph, document, relationsMap, hierarchyMap, entitiesMap){
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
 
-    /*
-    //stampo tutte le entità nel pannello del json
-    entities.forEach((objEntity, idPrincipale) => {
-        var jsonItem = document.createElement('li');
-        var shapeJSON = objEntity.toJSON();
-        var jsonString = JSON.stringify(shapeJSON, null, 2); // Converti l'oggetto in una stringa JSON formattata
-        jsonItem.textContent = jsonString;
-        jsonContainer.appendChild(jsonItem);
-    });*/
-
-
-    var json = getHierarchicalJSON(graph);
+    var json = getHierarchicalJSON(graph, relationsMap, hierarchyMap,entitiesMap);
     jsonContainer.innerHTML = JSON.stringify(json, null, 2);
 
     hljs.highlightBlock(jsonContainer);
 }
 
+
 // Funzione per ottenere una rappresentazione gerarchica delle celle in formato JSON
-function getHierarchicalJSON(graph) {
+function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
     var cells = graph.getCells();
     var hierarchy = [];
 
     cells.forEach(function(cell) {
+        var parent = null;
         if (cell.get('embeds') && cell.get('embeds').length > 0) {
-            if(cell.attributes.type ===  'standard.Rectangle'){
-                var parent = {
-                    Entity: cell.attr('label/text'), 
-                    Attributes: []
-                };
             
+            //entità 
+            if(cell.attributes.type ===  'standard.Rectangle'){
+                parent = {
+                    Entity: cell.attr('label/text'), 
+                    Attributes: [],
+                    Identifier: []
+                };
+    
                 cell.get('embeds').forEach(function(childId) {
                     var child = graph.getCell(childId);
                     if (child) {
@@ -42,16 +36,81 @@ function getHierarchicalJSON(graph) {
                             childText += ` (id)`;
                         }
                         parent.Attributes.push({
-                            Attribute: childText
+                            Attribute: child.attr('label/text') 
                         });
                     }
                 });
-    
+
+                //stampo l'identificatore (singolo/composto/esterno)
+                var objEntity = entitiesMap.get(cell);
+                if(objEntity){
+                    var ids = [];
+                    objEntity.getId().forEach((idCell) => {
+                        ids.push(idCell.attr('label/text') );
+                    })
+                    parent.Identifier.push(ids);  
+                }
                 hierarchy.push(parent);
             }
+            
+            
         }
+        //associazioni 
+        if(cell.attributes.type ===  'standard.Polygon'){
+            var parent = {
+                Relation: cell.attr('label/text'), 
+                Attributes: [],
+                Entities_connected: []
+            };
+            //prima quelle con qualche attributo 
+            if(cell.get('embeds')){
+
+                cell.get('embeds').forEach(function(childId) {
+                    var child = graph.getCell(childId);
+                    if (child) {
+                        parent.Attributes.push({
+                            Attribute: child.attr('label/text') 
+                        });
+                    }
+                });
+            }
+            const association = relationsMap.get(cell.id);
+
+            if (association) {
+                const entityConnections = association.getAllEntityConnections();
+                entityConnections.forEach(([entity, cardinality]) => {
+                    parent.Entities_connected.push({
+                        Entity: entity.attr('label/text'),
+                        Cardinality: cardinality
+                    });
+                });
+            } 
+            hierarchy.push(parent);
+        }
+        
+        //gerarchie
+        const generalization = hierarchyMap.get(cell.id);
+       
+        if (generalization) {
+
+            parent = {
+                Entity: cell.attr('label/text'), 
+                Entities_generalized: []
+            };
+            const entitiesGeneralized = generalization.getAllEntityGeneralizations();
+            entitiesGeneralized.forEach(([entity, coverage]) => {
+                parent.Entities_generalized.push({
+                Entity: entity.attr('label/text'),
+                Coverage: coverage
+                });
+            });
+            hierarchy.push(parent);
+        } 
+
+        
     });
 
+    
     return hierarchy;
 }
 
@@ -96,12 +155,10 @@ function getShapeJSON2(cell) {
         id: cell.id,             // ID univoco dell'elemento nel grafo
         attrs: cell.attr('label/text')       // Attributi visivi dell'elemento
     };
-
-
-
     // Restituisci il JSON modificato
     return JSON.stringify(baseProperties, null, 2); // Opzionale: formattazione per una visualizzazione più leggibile
 }
+
 
 function updateJSONList(graph) {
     var jsonContainer = document.querySelector('.json-container');

@@ -170,6 +170,7 @@ footer button{
     overflow-x: hidden; /* Disable horizontal scroll */
     padding-top: 60px; /* Place content 60px from the top */
     transition: 0.5s; /* 0.5 second transition effect to slide in the sidepanel */
+    font-family: 'Courier New', Courier, monospace;
   }
  
   /* Position and style the close button (top right corner) */

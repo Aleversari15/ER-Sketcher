@@ -1,47 +1,146 @@
 class Entity {
-    constructor(nome = '', id = '', attributi = [], entitaFiglie = [], copertura = '') {
-        this.Nome = nome;
-        this.Id = id;
-        this.Attributi = attributi;
-        this['Entità figlie'] = entitaFiglie;
-        this.Copertura = copertura;
+    constructor() {
+        this.id = [];
+        this.attributes = new Map(); //contiene ogni cella attributo e la sua cardinalità 
     }
 
-    setName(nome) {
-        this.Nome = nome;
+    // lista così posso anche salvarmi gli id composti/esterni
+    addId(id) {
+        this.id.push(id);
     }
 
-    setId(id) {
-        this.Id = id;
+    setId(ids){
+        this.id = ids; 
     }
 
-    addAttribute(attributo) {
-        this.Attributi.push(attributo);
+    getId(){
+        return this.id;
     }
 
-    setAttributes(attributi) {
-        this.Attributi = attributi;
+    addAttribute(attribute, cardinality) {
+        if(cardinality){
+            this.attributes.set(attribute, cardinality);
+        }
+        else{
+            this.attributes.set(attribute, null); //se null non dovrà essere disegnato nulla sul link 
+        }
+        
     }
 
-    addGeneralizedEntity(entitaFiglia) {
-        this['Entità figlie'].push(entitaFiglia);
+    getCardinality(attribute){
+        var card = this.attributes.get(attribute);
+        if(card){
+            return card;
+        }
     }
 
-    setGeneralizedEntity(entitaFiglie) {
-        this['Entità figlie'] = entitaFiglie;
+    setCardinality(attribute, newCardinality){
+        for (let [attributeCell, cardinality] of this.attributes.entries()) {
+            if (attributeCell.id === attribute.id) {
+                this.entitiesConnected.set(attributeCell, newCardinality);
+                return true;
+            }
+        }
     }
 
-    setCoverage(copertura) {
-        this.Copertura = copertura;
+}
+
+//classe utile per salvare le informazioni riguardanti le associazioni e le varie entità e cardinalità 
+class Association {
+    constructor(name) {
+        this.name = name;
+        this.entitiesConnected = new Map();
     }
 
-    toJSON() {
-        return {
-            'Entità': this.Nome,
-            //Id: this.Id,
-            Attributi: '{ ' + this.Attributi + ' }',
-            'Entità figlie': '{ ' + this['Entità figlie'] + ' }',
-            Copertura: this.Copertura
-        };
+    addEntityConnection(cell, cardinality) {
+        const validCardinalities = ['0-1', '1-1', '1-N', '0-N', 'N-N', 'Altro'];
+        if (validCardinalities.includes(cardinality)) {
+            this.entitiesConnected.set(cell, cardinality);
+        } else {
+            console.warn(`Invalid cardinality: ${cardinality}`);
+        }
+    }
+
+    getEntityConnection(cell) {
+        return this.entitiesConnected.get(cell);
+    }
+
+    removeEntityConnection(cell) {
+        this.entitiesConnected.delete(cell);
+    }
+
+    getAllEntityConnections() {
+        return Array.from(this.entitiesConnected.entries());
+    }
+
+    setCardinalityForEntityById(entityId, newCardinality) {
+        const validCardinalities = ['0-1', '1-1', '1-N', '0-N', 'N-N', 'Altro'];
+        if (!validCardinalities.includes(newCardinality)) {
+            console.warn(`Invalid cardinality: ${newCardinality}`);
+            return false;
+        }
+
+        for (let [cell, cardinality] of this.entitiesConnected.entries()) {
+            if (cell.id === entityId) {
+                this.entitiesConnected.set(cell, newCardinality);
+                return true;
+            }
+        }
+        console.warn(`Entity with ID: ${entityId} not found.`);
+        return false;
+    }
+}
+
+class Generalization {
+    constructor(name) {
+        this.name = name;
+        this.entitiesGeneralized = new Map();
+        this.hub = null;
+    }
+
+    addEntityGeneralization(cell, coverage) {
+        const validCoverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
+        if (validCoverages.includes(coverage)) {
+            this.entitiesGeneralized.set(cell, coverage);
+        } else {
+            console.warn(`Invalid coverage: ${coverage}`);
+        }
+    }
+
+    getEntityGeneralization(cell) {
+        return this.entitiesGeneralized.get(cell);
+    }
+
+    removeEntityGeneralization(cell) {
+        this.entitiesGeneralized.delete(cell);
+    }
+
+    getAllEntityGeneralizations() {
+        return Array.from(this.entitiesGeneralized.entries());
+    }
+
+    setCoverageForEntityById(entityId, newCoverage) {
+        const validCoverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
+        if (!validCoverages.includes(newCoverage)) {
+            console.warn(`Invalid coverage: ${newCoverage}`);
+            return false;
+        }
+
+        for (let [cell, coverage] of this.entitiesGeneralized.entries()) {
+            if (cell.id === entityId) {
+                this.entitiesGeneralized.set(cell, newCoverage);
+                return true;
+            }
+        }
+        console.warn(`Entity with ID: ${entityId} not found.`);
+        return false;
+    }
+
+    setHub(hub){
+        this.hub = hub;
+    }
+
+    getHub(){
+        return this.hub;
     }
 }

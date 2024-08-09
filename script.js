@@ -11,7 +11,7 @@ var linkClicked = null; // da togliere
 //mappe che contengono info che userò per creare il json da mostrare nel pannello laterale
 var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
 var relationsMap = new Map();
-
+var hierarchyMap = new Map();
 var attributeEntitity = new Map(); //chiave: id  shape attributo, elem: id shape di appartenenza (può essere rettangolo, rombo o ellisse)
 
 /*counters: alcuni counters andranno rimossi, basta controllare la lunghezza delle mappe*/
@@ -90,7 +90,7 @@ document.querySelector('.buttonRelation').addEventListener('click', function(){
     buttonRelationSelected = true;
 })
 
-//Quando l'utente clicca sul bottone relation
+//Quando l'utente clicca sul bottone Connect
 document.querySelector('.buttonConnect').addEventListener('click', function(){
     relationCounter++;
     buttonConnectSelected = true;
@@ -119,14 +119,8 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
             }
         });
         rect.addTo(graph);
-        buttonEntitySelected = false;
-
-        //creo l'oggetto che mi servirà per il json del pannello laterale
-        const entita = new Entity();
-        entita.setName(rect.attr('label/text'));
-        entita.setId(rect.id);
-        entitiesMap.set(rect.id, entita); 
-        
+        buttonEntitySelected = false; 
+        entitiesMap.set(rect, new Entity());
     }
     else if(buttonRelationSelected === true){
         var diamond = new joint.shapes.standard.Polygon();
@@ -137,7 +131,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         diamond.attr('body/refPoints', '0,10 10,0 20,10 10,20');
         diamond.addTo(graph);
         buttonRelationSelected = false;
-        relationsMap.set(diamond.id, new Map()); //aggiungo la relazione alla mappa
+        relationsMap.set(diamond.id, new Association(diamond.attr('label/text'))); //aggiungo la relazione alla mappa
     }
 });
 
@@ -158,20 +152,14 @@ paper.on('element:pointerdblclick', function(cellView) {
             selectedShapes[0].attr('body/stroke', 'purple');
             selectedShapes[1].attr('body/stroke', 'purple');
             
-            //se la prima  shape selezionata è il rombo, prendo il suo id, lo recupero dalla mappa delle relazioni e aggiungo la seconda figura tra gli oggetti associati.
+            //riempio la mappa che mi servirà per il json del pannello laterale
             if(selectedShapes[0].attributes.type === 'standard.Polygon'){
-                var innerMap = relationsMap.get(selectedShapes[0].id);
-                if(!innerMap.has(selectedShapes[1].id)){
-                    innerMap.set(selectedShapes[1].id, '1-N');
-                    console.log(innerMap.get(selectedShapes[1].id));
-                }
-            
+                var association = relationsMap.get(selectedShapes[0].id);
+                association.addEntityConnection(selectedShapes[1], '1-N');
+                
             }else{
-                var innerMap = relationsMap.get(selectedShapes[1].id);
-                if(!innerMap.has(selectedShapes[0].id)){
-                    innerMap.set(selectedShapes[0].id, '1-N');
-                    console.log(innerMap.get(selectedShapes[0].id));
-                }
+                var association = relationsMap.get(selectedShapes[1].id);
+                association.addEntityConnection(selectedShapes[0], '1-N');
             }  
 
             selectedShapes = []; //svuoto il vettore delle entità selezionate
@@ -182,7 +170,16 @@ paper.on('element:pointerdblclick', function(cellView) {
     //se la selezione è attiva e clicco su un rettangolo
     else if(selecting && (cell.isElement() && (cell.attributes.type === 'standard.Rectangle'))){
         //metodo che dato un'entità figlia e una padre, crea la gerarchia
-        setParent(currentElementSelected, cell, graph); 
+
+        //setParent(currentElementSelected, cell, graph, hierarchyMap); 
+        if(!hierarchyMap.get(cell.id)){
+            hierarchyMap.set(cell.id, new Generalization());
+        }
+        var gen = hierarchyMap.get(cell.id);
+        gen.addEntityGeneralization(currentElementSelected, '(t,e)');
+
+        //controllare
+        createBranchingLinks(cell, hierarchyMap.get(cell.id), graph, '(t,e)');
         selecting = false; 
 
     }
@@ -191,10 +188,7 @@ paper.on('element:pointerdblclick', function(cellView) {
 
 //Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
 document.querySelector('.openJSON').addEventListener('click', function(){
-    //inserisco le info nel pannello 
-    createJsonForPanel(graph, document, entitiesMap);
-    //updateJSONList(graph);
-    //rendo il pannello visibile
+    createJsonForPanel(graph, document, relationsMap, hierarchyMap,entitiesMap);
     document.getElementById("mySidepanel").style.width = "500px"; 
     
 });
@@ -227,6 +221,10 @@ document.getElementsByClassName('rename-button')[0].addEventListener('click', fu
 
 document.getElementsByClassName('key-button')[0].addEventListener('click', function(){
     setKey(shapeClicked);
+    var objEntity = entitiesMap.get(shapeClicked.getParentCell());
+    var id = [];
+    id.push(shapeClicked);
+    objEntity.setId(id);
     shapeClicked = null;
 })
 
@@ -262,10 +260,18 @@ paper.on('link:pointerdblclick', function(linkView) {
 
 paper.on('blank:pointerclick', function(){
     if(selecting === true){
-        //disegno il link
-        createKeyFromLinks(links, graph, linksId, paper, toolsView) //modificare
+        createKeyFromLinks(links, graph, linksId, paper, toolsView); //modificare
+        var entity = linksId[0].getSourceCell().getParentCell();
+        var objEntity = entitiesMap.get(entity);
+        var attributes = [];
+        linksId.forEach((l) => {
+            attributes.push(l.getSourceCell());
+        })
+        objEntity.setId(attributes);
+        
         selecting = false; 
         links=[];
+        //devo svuotare anche il vettore linkId? cambiare nome 
     }
     
 } )
@@ -303,7 +309,7 @@ paper.on('link:pointerclick', function(linkView) {
 // Gestisce il cambio del valore del menu a tendina per la cardinalità
 selectCardinality.addEventListener('change', function() {
     var value = selectCardinality.value;
-    updateLinkLabel(linkClicked, value); //modificare
+    updateLinkLabel(linkClicked, value, relationsMap); 
     linkClicked = null;
     shapeClicked= null;
 });

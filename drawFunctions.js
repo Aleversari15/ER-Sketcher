@@ -1,16 +1,5 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
 function addAttributeToShape(shape, graph, counter, type, entitiesMap, relationsMap, attributeEntity) {
-    // Ottieni la posizione della shape
-    var position = shape.position();
-    
-    //TO DO: correggere posizionamento attributo 
-    var attributePosition = {
-        x: (position.x - 50), 
-        y: (position.y - 10)
-    };
-
-    console.log('Shape position:',position)
-    console.log('Attribute position:', attributePosition);
 
     if(type === 'normal'){
         var attributo = new joint.shapes.standard.Circle();
@@ -22,7 +11,7 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
         attributo.resize(70, 40);
     }
     
-    attributo.position(attributePosition);
+    attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
     attributo.attr('root/title', 'joint.shapes.standard.Circle');
     attributo.attr('body/fill', 'white');
     attributo.attr('label/text', 'attributo'+ counter);
@@ -36,39 +25,21 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
     shape.embed(attributo);
 
-    if(shape.attributes.type === 'standard.Polygon'){
-        
-
-    }
-    else if (shape.attributes.type === 'standard.Rectangle'){
-        var entity = entitiesMap.get(shape.id);
-        entity.addAttribute(attributo.attr('label/text'));
-        attributeEntity.set(attributo.id, shape.id);
-    }
-    else if (shape.attributes.type === 'standard.Ellipse'){
-        //TO DO: caso il cui stiamo aggiungendo un sub attributo 
-    }
-
 }
 
 
 function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
-    var position = vlinks[0];
-                
-    var attributePosition = {
-        x: position.x + 10, 
-         y: position.y
-    };
-
-    console.log(attributePosition);
+    var shape = graph.getCell(linksId[0]).getSourceCell().getParentCell();
+    
     var attributo = new joint.shapes.standard.Circle();
                 attributo.resize(20, 20);
-                attributo.position(attributePosition);
+                attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
                 attributo.attr('root/title', 'joint.shapes.standard.Circle');
                 attributo.attr('body/fill', 'black');
                 graph.addCell(attributo);
 
     var endLink = vlinks[vlinks.length-1];
+
     var link = new joint.shapes.standard.Link();
     link.source(attributo);
     link.target(endLink);
@@ -90,6 +61,9 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
         linkToReach.vertices(vlinks[i]);
         
    }
+   //setto l'entità padre anche per l'attributo appena creato
+    console.log("Primo link selezionato ha come padre: ", graph.getCell(linksId[0]).getSourceCell().getParentCell().attr('label/text'));
+    graph.getCell(linksId[0]).getSourceCell().getParentCell().embed(attributo);
 
     //TO DO: correggere, devo settare il nuovo attributo come figlio dell'entità che contiene i vari link 
     linksId[0].getSourceCell().getParentCell().embed(attributo); //li setto tutti come genitori del link appena creato, così il suo spostamento e la sua esistenza dipende da loro
@@ -109,8 +83,8 @@ function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
     linkView.showTools();
 }
 
-
-function setParent(currentElementSelected, cell, graph){
+//metodo che permette di settare il padre di un'entita
+function setParent(currentElementSelected, cell, graph, coverage){
     var link = new joint.shapes.standard.Link;
     link.source({
         id: currentElementSelected.id,
@@ -131,7 +105,54 @@ function setParent(currentElementSelected, cell, graph){
             }
         }
     });
+    link.label(0, {
+        position: 0.5,
+        attrs: {
+            text: { text: coverage } // Esempio di etichetta di cardinalità
+        }
+    });
     graph.addCell(link);
+}
+
+function createBranchingLinks(parentShape, generalizedEnititesMap, graph, coverage) {
+    const entityGeneralized = generalizedEnititesMap.getAllEntityGeneralizations();
+
+    //salvo l'hub così che se aggiungo altre entità figlie in seguito, utilizzano lo stesso punto d'incontro 
+    var hub = generalizedEnititesMap.getHub();
+    console.log("Hub salvato: ", hub);
+
+    if(!hub){
+        hub = new joint.shapes.standard.Circle();
+        hub.position(parentShape.position().x + 200, parentShape.position().y + 100);
+        hub.resize(10, 10); // Piccolo nodo
+        hub.attr({
+            body: { fill: 'red' },
+            label: { text: '', fill: 'white' }
+        });
+        console.log("Hub creato: ", hub);
+        generalizedEnititesMap.setHub(hub);
+        graph.addCell(hub);
+        setParent(hub, parentShape,graph,coverage); //disegno la connessione tra hub e padre solo la prima volta
+    }
+    
+   
+    entityGeneralized.forEach(([entity, coverage]) => {
+        // Controlla se esiste già un collegamento dall'hub all'entità figlia
+        const existingLinks = graph.getConnectedLinks(hub, { outbound: true });
+        const linkExists = existingLinks.some(link => link.get('target').id === entity.id);
+
+        if (!linkExists){
+            var linkToChild = new joint.shapes.standard.Link();
+            linkToChild.source(hub);
+            linkToChild.target(entity);
+            linkToChild.attr({
+                line: {
+                    targetMarker: null 
+                }
+            });
+            graph.addCell(linkToChild);
+        }
+    });   
 }
 
 
@@ -145,9 +166,18 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
             targetMarker: null
         }
     });
-    graph.addCell(link);
 
-    //aggiungere cardinalità di default 1-N
+    //se sto collegando un'associazione ad un'entità allora imposto anche una cardinalità di default 
+    if((shape1.attributes.type === 'standard.Rectangle' && shape2.attributes.type === 'standard.Polygon') || 
+        (shape2.attributes.type === 'standard.Rectangle' && shape1.attributes.type === 'standard.Polygon')){
+        link.label(0, {
+            position: 0.5,
+            attrs: {
+                text: { text: '1-N' }
+            }
+        });
+    }
+    graph.addCell(link);
 }
 
 
@@ -203,7 +233,7 @@ function renameShape(shape, entities) {
 
 
 // Funzione per aggiornare la label del link in base alla scelta della cardinalità
-function updateLinkLabel(link, label) {
+function updateLinkLabel(link, label,relationsMap) {
     if (link) {
         link.label(0, {
             position: 0.5,
@@ -212,6 +242,27 @@ function updateLinkLabel(link, label) {
             }
         });
         console.log('Label del link cambiata in:', label);
+        
+        var associations = null;
+        var childToUpload = null;
+        //se l'id della cella source è contenuto nella mappa, allora è l'associazione e possiamo prendere il suo oggetto associato e aggiornare la label per il json
+        if(relationsMap.get(link.getSourceCell().id)){
+            associations = relationsMap.get(link.getSourceCell().id);
+            childToUpload = link.getTargetCell();
+        }
+        else if(relationsMap.get(link.getTargetCell().id)){
+            associations = relationsMap.get(link.getTargetCell().id);
+            childToUpload = link.getSourceCell();
+        }
+        //se l'oggetto non è vuoto e quindi stiamo aggiornando la cardinalità di un'associazione 
+        if (associations) {
+            const entityConnections = associations.getAllEntityConnections();
+            entityConnections.forEach(([entity, cardinality]) => {
+               if(entity.id === childToUpload.id){
+                associations.setCardinalityForEntityById(childToUpload.id, label);
+               }
+            });
+        } 
     } else {
         alert('Seleziona un link prima di cambiare la label.');
     }
