@@ -94,21 +94,13 @@ class Association {
 class Generalization {
     constructor(name) {
         this.name = name;
-        this.entitiesGeneralized = new Map();
+        this.entitiesGeneralized = [];
         this.hub = null;
+        this.coverage = '(t,e)';
     }
 
-    addEntityGeneralization(cell, coverage) {
-        const validCoverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
-        if (validCoverages.includes(coverage)) {
-            this.entitiesGeneralized.set(cell, coverage);
-        } else {
-            console.warn(`Invalid coverage: ${coverage}`);
-        }
-    }
-
-    getEntityGeneralization(cell) {
-        return this.entitiesGeneralized.get(cell);
+    addEntityGeneralization(cell) {
+        this.entitiesGeneralized.push(cell);
     }
 
     removeEntityGeneralization(cell) {
@@ -116,24 +108,21 @@ class Generalization {
     }
 
     getAllEntityGeneralizations() {
-        return Array.from(this.entitiesGeneralized.entries());
+        return this.entitiesGeneralized;
     }
 
-    setCoverageForEntityById(entityId, newCoverage) {
+    setCoverage(newCoverage) {
         const validCoverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
         if (!validCoverages.includes(newCoverage)) {
             console.warn(`Invalid coverage: ${newCoverage}`);
             return false;
         }
-
-        for (let [cell, coverage] of this.entitiesGeneralized.entries()) {
-            if (cell.id === entityId) {
-                this.entitiesGeneralized.set(cell, newCoverage);
-                return true;
-            }
-        }
-        console.warn(`Entity with ID: ${entityId} not found.`);
+        this.coverage = newCoverage; 
         return false;
+    }
+
+    getCoverage(){
+        return this.coverage;
     }
 
     setHub(hub){

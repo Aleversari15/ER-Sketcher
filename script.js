@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function(){
 var namespace = joint.shapes;
 var graph = new joint.dia.Graph({}, { cellNamespace: namespace });
@@ -230,7 +229,7 @@ document.getElementsByClassName('key-button')[0].addEventListener('click', funct
 
 document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal', entitiesMap, relationsMap, attributeEntitity); //modificare
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal');
     shapeClicked = null;
 })
 
@@ -241,7 +240,7 @@ document.getElementsByClassName('cardinality')[0].addEventListener('click', func
 
 document.getElementsByClassName('subAttribute')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute', entitiesMap, relationsMap, attributeEntitity); //modificare
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute');
     shapeClicked = null;
 })
 
@@ -309,15 +308,37 @@ paper.on('link:pointerclick', function(linkView) {
 // Gestisce il cambio del valore del menu a tendina per la cardinalità
 selectCardinality.addEventListener('change', function() {
     var value = selectCardinality.value;
-    updateLinkLabel(linkClicked, value, relationsMap); 
+    updateLinkLabel(linkClicked, value, relationsMap,hierarchyMap); 
     linkClicked = null;
     shapeClicked= null;
 });
 
-// Gestisce il cambio del valore del menu a tendina per la copertura della gerarchia
+/**
+ * Se viene modificato il valore del menù a tendina riguardante la copertura, modifica la copertura del link della gerarchia selezionato,
+ * se e solo se si tratta del link che collega l'entità padre all'hub (in questo modo non è possibile assegnare la cardinalità ai singoli 
+ * link collegati alle celle figlie)
+ */
 selectCoverage.addEventListener('change', function() {
     var value = selectCoverage.value;
-    updateLinkLabel(linkClicked, value); //modificare
+    var entity = linkClicked.getTargetCell();
+    var generalization = hierarchyMap.get(entity.id);
+    console.log("Entità padre: ", entity.attr("label/text"));
+    console.log("Generalizzazione: ", generalization);
+    if(generalization && linkClicked.getSourceCell().id === generalization.getHub().id){
+        updateLinkLabel(linkClicked, value, relationsMap, hierarchyMap);
+    }
+    else{
+        // Mostra il messaggio d'errore
+        var errorMessage = "Errore: Non è possibile assegnare la copertura a questo link.";
+        var errorElement = document.getElementsByClassName('error-message')[0];
+        errorElement.innerText = errorMessage;
+        errorElement.style.display = 'block';
+
+        // Nascondi il messaggio dopo 5 secondi (5000 millisecondi)
+        setTimeout(function() {
+            errorElement.style.display = 'none';
+        }, 5000);
+    }
     linkClicked = null;
     shapeClicked= null;
 });

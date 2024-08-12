@@ -1,5 +1,5 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
-function addAttributeToShape(shape, graph, counter, type, entitiesMap, relationsMap, attributeEntity) {
+function addAttributeToShape(shape, graph, counter, type) {
     if(type === 'normal'){
         var attributo = new joint.shapes.standard.Circle();
         attributo.resize(20, 20);
@@ -87,7 +87,14 @@ function createKeyFromLinks(vertices, graph, links, paper, toolsView){
     updateVertices();
 }
 
-//metodo che permette di settare il padre di un'entita
+/**
+ * Metodo che permette di creare il collegamento tra l'entità padre e un'altra cella (in questo caso viene 
+ * usato per collegarla all'hub dell'entità)
+ * @param {*} currentElementSelected cella da collegare all'entità padre
+ * @param {*} cell cella padre
+ * @param {*} graph 
+ * @param {*} coverage copertura che si vuole assegnare alla gerarchia
+ */
 function setParent(currentElementSelected, cell, graph, coverage){
     var link = new joint.shapes.standard.Link;
     link.source({
@@ -118,10 +125,12 @@ function setParent(currentElementSelected, cell, graph, coverage){
     graph.addCell(link);
 }
 
-/*Metodo utilizzato per il disegno delle gerarchie. Ogni volta che viene aggiunta una shape figlia, 
-questa viene collegata con l'hub (ossia il punto di incontro dei vari collegamenti alle celle figlie).
-Il collegamento tra hub e entità padre viene disegnato solo la prima volta, poi il riferimento all'hub 
-viene memorizzato nell'oggetto entity corrispondente alla shape padre*/
+/**
+ * Metodo utilizzato per il disegno delle gerarchie. Ogni volta che viene aggiunta una shape figlia, 
+ * questa viene collegata con l'hub (ossia il punto di incontro dei vari collegamenti alle celle figlie).
+ * Il collegamento tra hub e entità padre viene disegnato solo la prima volta, poi il riferimento all'hub 
+ * viene memorizzato nell'oggetto entity corrispondente alla shape padre
+ */
 function createBranchingLinks(parentShape, generalizedEnititesMap, graph, coverage) {
     const entityGeneralized = generalizedEnititesMap.getAllEntityGeneralizations();
     var hub = generalizedEnititesMap.getHub();
@@ -141,8 +150,7 @@ function createBranchingLinks(parentShape, generalizedEnititesMap, graph, covera
         setParent(hub, parentShape,graph,coverage);
     }
     
-   
-    entityGeneralized.forEach(([entity, coverage]) => {
+    entityGeneralized.forEach((entity) => {
         const existingLinks = graph.getConnectedLinks(hub, { outbound: true });
         const linkExists = existingLinks.some(link => link.get('target').id === entity.id);
         //se il collegamento con la cella figlia non è ancora stato disegnato
@@ -238,7 +246,7 @@ function renameShape(shape, entities) {
 
 
 // Funzione per aggiornare la label del link in base alla scelta della cardinalità
-function updateLinkLabel(link, label,relationsMap) {
+function updateLinkLabel(link, label,relationsMap, hierarchyMap) {
     if (link) {
         link.label(0, {
             position: 0.5,
@@ -250,24 +258,33 @@ function updateLinkLabel(link, label,relationsMap) {
         
         var associations = null;
         var childToUpload = null;
-        //se l'id della cella source è contenuto nella mappa, allora è l'associazione e possiamo prendere il suo oggetto associato e aggiornare la label per il json
-        if(relationsMap.get(link.getSourceCell().id)){
-            associations = relationsMap.get(link.getSourceCell().id);
-            childToUpload = link.getTargetCell();
-        }
-        else if(relationsMap.get(link.getTargetCell().id)){
-            associations = relationsMap.get(link.getTargetCell().id);
-            childToUpload = link.getSourceCell();
-        }
-        //se l'oggetto non è vuoto e quindi stiamo aggiornando la cardinalità di un'associazione 
-        if (associations) {
-            const entityConnections = associations.getAllEntityConnections();
-            entityConnections.forEach(([entity, cardinality]) => {
-               if(entity.id === childToUpload.id){
-                associations.setCardinalityForEntityById(childToUpload.id, label);
-               }
-            });
+        
+        if(link.getSourceCell().attributes.type === 'standard.Rectangle'){
+            //se l'id della cella source è contenuto nella mappa, allora è l'associazione e possiamo prendere il suo oggetto 
+            //associato e aggiornare la label per il json
+            if(relationsMap.get(link.getSourceCell().id)){
+                associations = relationsMap.get(link.getSourceCell().id);
+                childToUpload = link.getTargetCell();
+            }
+            else if(relationsMap.get(link.getTargetCell().id)){
+                associations = relationsMap.get(link.getTargetCell().id);
+                childToUpload = link.getSourceCell();
+            }
+            //se l'oggetto non è vuoto e quindi stiamo aggiornando la cardinalità di un'associazione 
+            if (associations) {
+                const entityConnections = associations.getAllEntityConnections();
+                entityConnections.forEach(([entity, cardinality]) => {
+                if(entity.id === childToUpload.id){
+                    associations.setCardinalityForEntityById(childToUpload.id, label);
+                }
+                });
+            }
         } 
+        //se si tratta di un link di una gerarchia (la sorgente è l'hub), allora aggiorno la copertura nel json 
+        else if (link.getSourceCell().attributes.type === 'standard.Circle'){
+            var generalization = hierarchyMap.get(link.getTargetCell().id);
+            generalization.setCoverage(label);
+        }
     } else {
         alert('Seleziona un link prima di cambiare la label.');
     }

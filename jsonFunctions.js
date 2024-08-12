@@ -94,14 +94,14 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
         if (generalization) {
 
             parent = {
-                Entity: cell.attr('label/text'), 
+                Entity: cell.attr('label/text'),
+                Coverage: generalization.getCoverage(), 
                 Entities_generalized: []
             };
             const entitiesGeneralized = generalization.getAllEntityGeneralizations();
-            entitiesGeneralized.forEach(([entity, coverage]) => {
+            entitiesGeneralized.forEach((entity) => {
                 parent.Entities_generalized.push({
                 Entity: entity.attr('label/text'),
-                Coverage: coverage
                 });
             });
             hierarchy.push(parent);
