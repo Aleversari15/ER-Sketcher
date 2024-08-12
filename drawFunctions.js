@@ -1,6 +1,5 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
 function addAttributeToShape(shape, graph, counter, type, entitiesMap, relationsMap, attributeEntity) {
-
     if(type === 'normal'){
         var attributo = new joint.shapes.standard.Circle();
         attributo.resize(20, 20);
@@ -10,77 +9,82 @@ function addAttributeToShape(shape, graph, counter, type, entitiesMap, relations
         var attributo = new joint.shapes.standard.Ellipse();
         attributo.resize(70, 40);
     }
-    
     attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
     attributo.attr('root/title', 'joint.shapes.standard.Circle');
     attributo.attr('body/fill', 'white');
     attributo.attr('label/text', 'attributo'+ counter);
-   
-
-    // Aggiungi l'attributo al grafo
     graph.addCell(attributo);
 
     createLinkBetweenEntities(attributo, shape, graph);
 
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
     shape.embed(attributo);
-
 }
 
 
-function createKeyFromLinks(vlinks, graph, linksId, paper, toolsView){
-    var shape = graph.getCell(linksId[0]).getSourceCell().getParentCell();
-    
+/**Metodo che permette di creare un attributo passante attraverso più links. Viene utilizzato sia per creare un identificatore esterno, 
+ * che per gli identificatori composti. Parametri:
+ * - vertices: vettore contenenti i punti che si trovano esattamente al centro dei link da attraversare
+ * - graph
+ * - link: vettore che contiene i vari link da attraversare (l'intera cella)
+ * - paper
+ * - toolsView */
+function createKeyFromLinks(vertices, graph, links, paper, toolsView){
+    var shape = graph.getCell(links[0]).getSourceCell().getParentCell(); //entità padre dei vari attributi da attraversare
     var attributo = new joint.shapes.standard.Circle();
                 attributo.resize(20, 20);
                 attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
                 attributo.attr('root/title', 'joint.shapes.standard.Circle');
                 attributo.attr('body/fill', 'black');
                 graph.addCell(attributo);
-
-    var endLink = vlinks[vlinks.length-1];
+    var endLink = vertices[vertices.length-1];
 
     var link = new joint.shapes.standard.Link();
     link.source(attributo);
     link.target(endLink);
-    link.router('metro'); // Applica il router metro al link
+    link.router('metro'); 
     link.attr({
         line: {
             targetMarker: null
         }
     });
-    /*//escludo l'ultimo per non creare doppi passaggi sullo stesso vertice
-    if (vlinks.length > 2) {
-        link.vertices(vlinks.slice(0, vlinks.length - 1));
-    }*/
-   link.vertices(vlinks);
-
-   //aggiungere i vertici anche ai link che vengono collegati
-   for(i=0; i<linksId.length; i++){
-        const linkToReach = graph.getCell(linksId[i]);
-        linkToReach.vertices(vlinks[i]);
+   link.vertices(vertices);
+   for(i=0; i<links.length; i++){
+        const linkToReach = graph.getCell(links[i]);
+        linkToReach.vertices(vertices[i]);
         
    }
-   //setto l'entità padre anche per l'attributo appena creato
-    console.log("Primo link selezionato ha come padre: ", graph.getCell(linksId[0]).getSourceCell().getParentCell().attr('label/text'));
-    graph.getCell(linksId[0]).getSourceCell().getParentCell().embed(attributo);
+    shape.embed(attributo); 
 
-    //TO DO: correggere, devo settare il nuovo attributo come figlio dell'entità che contiene i vari link 
-    linksId[0].getSourceCell().getParentCell().embed(attributo); //li setto tutti come genitori del link appena creato, così il suo spostamento e la sua esistenza dipende da loro
-    
+    link.set('target', { id: links[links.length -1].id, selector: 'body' });
+    link.set('source', { id: attributo.id, selector: 'body' });
+    link.addTo(graph);
 
-    //TO FIX non riconosce il nome dell'anchor
-    var anchor = { name: 'connectionPerpendicular', args: { connectionPoint: 'middle' } };
-    link.set('target', { id: linksId[linksId.length -1].id, selector: 'body', anchor: anchor });
-    link.set('source', { id: attributo.id, selector: 'body', anchor: anchor });
-    console.log(vlinks)
-    link.addTo(graph)
-
-    // Aggiungere la vista degli strumenti al collegamento
     const linkView = link.findView(paper);
     linkView.addTools(toolsView);
-    // Attivare la visualizzazione dei vertici
     linkView.showTools();
+
+    // Funzione per calcolare i punti medi dei link così da aggiornare dinamicamente 
+    //la posizione dei vertici durante lo spostamento della shape padre
+    function updateVertices() {
+        var newVertices = links.map(function (link) {
+            var linkCell = graph.getCell(link);
+            var linkView = paper.findViewByModel(linkCell);
+            var bbox = linkView.getBBox();
+            return bbox.center(); 
+        });
+        link.vertices(newVertices);
+        for (var i = 0; i < links.length; i++) {
+            const linkToUpdate = graph.getCell(links[i]);
+            linkToUpdate.vertices([newVertices[i]]);
+        }
+    }
+
+    shape.on('change:position', function () {
+        updateVertices();
+    });
+
+    updateVertices();
 }
 
 //metodo che permette di settare il padre di un'entita
@@ -114,17 +118,19 @@ function setParent(currentElementSelected, cell, graph, coverage){
     graph.addCell(link);
 }
 
+/*Metodo utilizzato per il disegno delle gerarchie. Ogni volta che viene aggiunta una shape figlia, 
+questa viene collegata con l'hub (ossia il punto di incontro dei vari collegamenti alle celle figlie).
+Il collegamento tra hub e entità padre viene disegnato solo la prima volta, poi il riferimento all'hub 
+viene memorizzato nell'oggetto entity corrispondente alla shape padre*/
 function createBranchingLinks(parentShape, generalizedEnititesMap, graph, coverage) {
     const entityGeneralized = generalizedEnititesMap.getAllEntityGeneralizations();
-
-    //salvo l'hub così che se aggiungo altre entità figlie in seguito, utilizzano lo stesso punto d'incontro 
     var hub = generalizedEnititesMap.getHub();
     console.log("Hub salvato: ", hub);
 
     if(!hub){
         hub = new joint.shapes.standard.Circle();
         hub.position(parentShape.position().x + 200, parentShape.position().y + 100);
-        hub.resize(10, 10); // Piccolo nodo
+        hub.resize(10, 10); 
         hub.attr({
             body: { fill: 'red' },
             label: { text: '', fill: 'white' }
@@ -132,15 +138,14 @@ function createBranchingLinks(parentShape, generalizedEnititesMap, graph, covera
         console.log("Hub creato: ", hub);
         generalizedEnititesMap.setHub(hub);
         graph.addCell(hub);
-        setParent(hub, parentShape,graph,coverage); //disegno la connessione tra hub e padre solo la prima volta
+        setParent(hub, parentShape,graph,coverage);
     }
     
    
     entityGeneralized.forEach(([entity, coverage]) => {
-        // Controlla se esiste già un collegamento dall'hub all'entità figlia
         const existingLinks = graph.getConnectedLinks(hub, { outbound: true });
         const linkExists = existingLinks.some(link => link.get('target').id === entity.id);
-
+        //se il collegamento con la cella figlia non è ancora stato disegnato
         if (!linkExists){
             var linkToChild = new joint.shapes.standard.Link();
             linkToChild.source(hub);
