@@ -1,9 +1,9 @@
 
-function createJsonForPanel(graph, document, relationsMap, hierarchyMap, entitiesMap){
+function createJsonForPanel(graph, document, relationsMap, hierarchyMap, entitiesMap,subAttributesMap){
     var jsonContainer = document.querySelector('.json-container');
     jsonContainer.innerHTML = ''; // Svuota la lista prima di aggiungere gli elementi
 
-    var json = getHierarchicalJSON(graph, relationsMap, hierarchyMap,entitiesMap);
+    var json = getHierarchicalJSON(graph, relationsMap, hierarchyMap,entitiesMap,subAttributesMap);
     jsonContainer.innerHTML = JSON.stringify(json, null, 2);
 
     hljs.highlightBlock(jsonContainer);
@@ -11,7 +11,7 @@ function createJsonForPanel(graph, document, relationsMap, hierarchyMap, entitie
 
 
 // Funzione per ottenere una rappresentazione gerarchica delle celle in formato JSON
-function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
+function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap, subAttributesMap) {
     var cells = graph.getCells();
     var hierarchy = [];
 
@@ -30,14 +30,30 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap) {
                 cell.get('embeds').forEach(function(childId) {
                     var child = graph.getCell(childId);
                     if (child) {
-                        var childText = child.attr('label/text');
-                        // Aggiungi la condizione per controllare il colore del riempimento del corpo
-                        if (child.attr('body/fill') === 'black') {
-                            childText += ` (id)`;
+                        if(!subAttributesMap.get(child.id)){
+                            parent.Attributes.push({
+                                Attribute: child.attr('label/text') 
+                            });
                         }
-                        parent.Attributes.push({
-                            Attribute: child.attr('label/text') 
-                        });
+                        //se si tratta di un gruppo di attributi devo stampare anche tutti i singoli subattributi
+                        else{
+                            var subAttributesList = subAttributesMap.get(child.id).getSubAttributes();
+                            var attributeGroup = {
+                                Attribute: child.attr('label/text'), // Nome del gruppo di attributi
+                                SubAttributes: []  // Lista di sub-attributi
+                            };
+
+                            // Itera sui sub-attributi e aggiungili alla lista SubAttributes
+                            subAttributesList.forEach((a) => {
+                                attributeGroup.SubAttributes.push({
+                                    SubAttribute: a.attr('label/text')
+                                });
+                            });
+
+                            // Aggiungi il gruppo di attributi a Attributes
+                            parent.Attributes.push(attributeGroup);
+                        }
+                        
                     }
                 });
 

@@ -1,24 +1,30 @@
 //funzione che prende in input un'entità e considerandone le coordinate gli aggiunge un attributo
-function addAttributeToShape(shape, graph, counter, type) {
+function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
     if(type === 'normal'){
-        var attributo = new joint.shapes.standard.Circle();
-        attributo.resize(20, 20);
-        attributo.attr('label/ref-y', -10);  // 10 pixel sopra il cerchio
-        attributo.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
+        var attribute = new joint.shapes.standard.Circle();
+        attribute.resize(20, 20);
+        attribute.attr('label/ref-y', -10);  // 10 pixel sopra il cerchio
+        attribute.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
     }else{
-        var attributo = new joint.shapes.standard.Ellipse();
-        attributo.resize(70, 40);
+        var attribute = new joint.shapes.standard.Ellipse();
+        attribute.resize(70, 40);
     }
-    attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
-    attributo.attr('root/title', 'joint.shapes.standard.Circle');
-    attributo.attr('body/fill', 'white');
-    attributo.attr('label/text', 'attributo'+ counter);
-    graph.addCell(attributo);
-
-    createLinkBetweenEntities(attributo, shape, graph);
+    attribute.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
+    attribute.attr('root/title', 'joint.shapes.standard.Circle');
+    attribute.attr('body/fill', 'white');
+    attribute.attr('label/text', 'attributo'+ counter);
+    graph.addCell(attribute);
+    //se stiamo aggiungendo un attributo a un attributo con forma ellittica (subattributo) dobbiamo aggiungerlo alla mappa
+    if(shape.attributes.type === 'standard.Ellipse'){
+        if(!subAttributesMap.get(shape.id)){
+            subAttributesMap.set(shape.id, new groupAttribute());
+        }
+        subAttributesMap.get(shape.id).addSubAttribute(attribute);
+    }
+    createLinkBetweenEntities(attribute, shape, graph);
 
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
-    shape.embed(attributo);
+    shape.embed(attribute);
 }
 
 

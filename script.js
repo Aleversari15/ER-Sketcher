@@ -11,7 +11,7 @@ var linkClicked = null; // da togliere
 var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
 var relationsMap = new Map();
 var hierarchyMap = new Map();
-var attributeEntitity = new Map(); //chiave: id  shape attributo, elem: id shape di appartenenza (può essere rettangolo, rombo o ellisse)
+var subAttributesMap = new Map();
 
 /*counters: alcuni counters andranno rimossi, basta controllare la lunghezza delle mappe*/
 var entityCounter = 0; 
@@ -193,7 +193,7 @@ paper.on('element:pointerdblclick', function(cellView) {
 
 //Quando l'utente clicca nel bottone 'edit JSON' nel pannello laterale che si apre deve comparire il JSON del diagramma
 document.querySelector('.openJSON').addEventListener('click', function(){
-    createJsonForPanel(graph, document, relationsMap, hierarchyMap,entitiesMap);
+    createJsonForPanel(graph, document, relationsMap, hierarchyMap,entitiesMap,subAttributesMap);
     document.getElementById("mySidepanel").style.width = "500px"; 
     
 });
@@ -235,7 +235,7 @@ document.getElementsByClassName('key-button')[0].addEventListener('click', funct
 
 document.getElementsByClassName('attribute-button')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal');
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'normal', subAttributesMap);
     shapeClicked = null;
 })
 
@@ -246,7 +246,7 @@ document.getElementsByClassName('cardinality')[0].addEventListener('click', func
 
 document.getElementsByClassName('subAttribute')[0].addEventListener('click', function(){
     attributesCounter++;
-    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute');
+    addAttributeToShape(shapeClicked,graph, attributesCounter, 'subattribute', subAttributesMap);
     shapeClicked = null;
 })
 

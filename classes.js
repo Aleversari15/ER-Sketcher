@@ -133,3 +133,18 @@ class Generalization {
         return this.hub;
     }
 }
+
+class groupAttribute{
+    constructor(){
+        this.subAttributes = [];
+    }
+
+    addSubAttribute(attribute){
+        this.subAttributes.push(attribute);
+    }
+
+    getSubAttributes(){
+        return this.subAttributes;
+    }
+
+}
