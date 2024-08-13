@@ -29,6 +29,12 @@ var shapeClicked = null;
 var links=[];
 var linksId=[];
 
+
+//undo e redo
+var undoStack = [];
+var redoStack = [];
+
+
 var paper = new joint.dia.Paper({
     el: document.getElementById('drawContainer'),
     model: graph,
@@ -288,10 +294,6 @@ document.querySelector('.extId').addEventListener('click', function(){
 })
 
 
-
-
-
-
 // Gestisce la selezione di un link
 paper.on('link:pointerclick', function(linkView) {
     shapeClicked = linkView.model; //perchè non funziona quando lo passo alla funzione per aggiornare la cardinalità?
@@ -374,6 +376,65 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     }
 });
 
+
+// Funzione per ottenere lo stato attuale del diagramma come JSON
+function saveCurrentState() {
+    return JSON.stringify(graph.toJSON());
+}
+
+// Funzione per ripristinare lo stato del diagramma da un JSON
+function restoreState(json) {
+    graph.fromJSON(JSON.parse(json));
+}
+
+// Salva lo stato corrente nello stack di undo e ripulisce lo stack di redo
+function saveStateForUndo() {
+    undoStack.push(saveCurrentState());
+    redoStack = []; 
+}
+
+
+function undo() {
+    if (undoStack.length > 0) {
+        var currentState = saveCurrentState();
+        redoStack.push(currentState);
+
+        var previousState = undoStack.pop(); // Ripristina lo stato precedente
+        restoreState(previousState);
+    }
+}
+
+
+function redo() {
+    if (redoStack.length > 0) {
+        var currentState = saveCurrentState(); 
+        undoStack.push(currentState);
+
+        var nextState = redoStack.pop(); // Ripristina lo stato successivo
+        restoreState(nextState);
+    }
+}
+
+
+graph.on('change', function(cell) {
+    saveStateForUndo();
+});
+
+graph.on('add', function(cell) {
+    saveStateForUndo();
+});
+
+graph.on('remove', function(cell) {
+    saveStateForUndo();
+});
+
+document.querySelector('.undo').addEventListener('click', function() {
+    undo();
+});
+
+document.querySelector('.redo').addEventListener('click', function() {
+    redo();
+});
 
 
 
