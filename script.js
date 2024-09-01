@@ -437,6 +437,57 @@ document.querySelector('.redo').addEventListener('click', function() {
 });
 
 
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key === 'v') {
+        // Incolla gli elementi
+        pasteElements(graph,localStorage);
+    }
+});
 
+// Evento di inizio trascinamento (mousedown)
+paper.on('blank:pointerdown', function(event, x, y) {
+    selectionStartPoint = { x, y };
+    selectionRect = new joint.shapes.standard.Rectangle();
+    selectionRect.position(x, y);
+    selectionRect.resize(1, 1);  
+    selectionRect.attr({
+        body: {
+            fill: 'rgba(0, 153, 255, 0.3)',
+            stroke: '#3399ff',
+            strokeWidth: 1,
+            strokeDasharray: '5,5'
+        }
+    });
+    selectionRect.addTo(graph);
+});
 
+// Evento di trascinamento (mousemove)
+paper.on('cell:pointermove blank:pointermove', function(event, x, y) {
+    if (!selectionStartPoint) return;
+
+    const width = Math.abs(x - selectionStartPoint.x);
+    const height = Math.abs(y - selectionStartPoint.y);
+    const position = {
+        x: Math.min(x, selectionStartPoint.x),
+        y: Math.min(y, selectionStartPoint.y)
+    };
+    selectionRect.position(position.x, position.y);
+    selectionRect.resize(width, height);
+});
+
+// Evento di fine trascinamento (mouseup)
+paper.on('cell:pointerup blank:pointerup', function(event, x, y) {
+    if (!selectionStartPoint) return;
+
+    const selectionBBox = selectionRect.getBBox();
+
+    const selectedElements = paper.findViewsInArea(selectionBBox);
+    selectionRect.remove();
+    selectionRect = null;
+    selectionStartPoint = null;
+
+    if (selectedElements.length > 0) {
+        copyElements(graph, selectedElements.map(view => view.model),localStorage);
+    }
+});
 }); 
