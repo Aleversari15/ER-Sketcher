@@ -33,30 +33,30 @@
           <input type="text" class="nomeProgetto" placeholder="Inserisci nome progetto"/>
         </form>
         <div class="pulsantiSalvataggio">
-          <button class="loadFile"><i class="fas fa-plus fa-2x"></i></button>
+          <button class="loadFile" title="Load file"><i class="fas fa-plus fa-2x"></i></button>
           <input type="file" id="fileInput" style="display: none;" accept=".json">
-          <button class="download"><i class="fas fa-download fa-2x"></i></button>
+          <button class="download" title="Download file"><i class="fas fa-download fa-2x"></i></button>
         </div>
       </div>
       <div class="barraComandi">
         <div class="bottoniSpecifici">
-          <button class="undo"><i class="fas fa-arrow-left "></i></button>
-          <button class="redo"><i class="fas fa-arrow-right "></i></button>
+          <button class="undo" title="Undo"><i class="fas fa-arrow-left "></i></button>
+          <button class="redo" title="Redo"><i class="fas fa-arrow-right "></i></button>
           <div class="entity">
-            <button class="buttonDrawEntity"><i class="far fa-square "></i></button>
+            <button class="buttonDrawEntity" title="Add entity"><i class="far fa-square "></i></button>
             <p>Entity</p>
           </div>
           <div class="relation">
-            <button class="buttonConnect"><i class="fas fa-project-diagram "></i></button>
+            <button class="buttonConnect" title="Connect"><i class="fas fa-project-diagram "></i></button>
             <p>Connect</p>
           </div>
           <div>
-            <button class="buttonRelation"><i class="far fa-gem "></i></button>
+            <button class="buttonRelation" title="Add relation"><i class="far fa-gem "></i></button>
             <p>Relation</p>
           </div>
 
         </div>
-        <button><i class="fas fa-bars fa-2x"></i></button>
+        <button><i class="far fa-question-circle fa-2x" title="Instructions"></i></button>
       </div>
     </header>
     <main>
@@ -64,25 +64,25 @@
       <div id="paper"></div>
       <div class="command-palette">
         <div class="command-group">
-          <button class="delete-button"><i class="fas fa-trash-alt "></i></button>
-          <button class="rename-button"><i class="fab fa-autoprefixer "></i></button>
+          <button class="delete-button" title="Delete"><i class="fas fa-trash-alt "></i></button>
+          <button class="rename-button" title="Rename"><i class="fab fa-autoprefixer "></i></button>
         </div>
         <div class="command-group">
-          <button class="key-button"><i class="fas fa-key"></i></button>
-          <button class="attribute-button"><i class="fas fa-map-pin"></i></button>
+          <button class="key-button" title="Set identifier"><i class="fas fa-key"></i></button>
+          <button class="attribute-button" title="Add attribute"><i class="fas fa-map-pin"></i></button>
         </div>
         <div class="command-group">
-          <select class="cardinality" name="cardinality">
+          <select class="cardinality" name="cardinality" title="Set cardinality">
           </select>
-          <button class="subAttribute">SubAttr.</button>
+          <button class="subAttribute" title="Add composite attribute">Composite attribute</button>
         </div>
         <div class="command-group">
-          <button class="composedId">Comp.Id</button>
-          <button class="extId">Ext.Id.</button>
+          <button class="composedId" title="Compose id">Compose Id</button>
+          <button class="extId" title="Add external ide">External Id</button>
         </div>
         <div class="command-group">
-          <button class="hierarchy">Ger.</button>
-          <select class="coverage" name="coverage"></select>
+          <button class="hierarchy" title="Add hierarchy">Hierarchy</button>
+          <select class="coverage" name="coverage" title="Set coverage"></select>
         </div>
       </div>
     </main>
@@ -96,11 +96,11 @@
       </ul>
     </div>
     
-    <button class="openbtn edit openJSON"><i class="fas fa-pencil-alt "></i> Edit JSON</button>
+    <button class="openbtn edit openJSON" title="Open JSON panel"><i class="fas fa-pencil-alt "></i> Edit JSON</button>
 
     <div class="zoom">
-      <button class="zoomIn"><i class="fas fa-search-plus "></i></button>
-      <button class="zoomOut"><i class="fas fa-search-minus "></i></button>
+      <button class="zoomIn" title="Zoom in"><i class="fas fa-search-plus "></i></button>
+      <button class="zoomOut" title="Zoom out"><i class="fas fa-search-minus "></i></button>
     </div>
     <div></div>
   </footer>
