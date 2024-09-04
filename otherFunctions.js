@@ -136,6 +136,17 @@ function updateLinks(targetGraph, copiedCells) {
 }
 
 
+function zoomOut(paper){
+    window.graphScale = Math.max(0.1, window.graphScale - 0.1); // Limitiamo il valore minimo di scala a 0.1 per evitare zoom negativi o troppo piccoli
+    paper.scale(window.graphScale, window.graphScale);
+}
+
+function zoomIn(paper){
+    window.graphScale = window.graphScale + 0.1;
+    paper.scale(window.graphScale, window.graphScale);
+}
+
+
 
 
 

@@ -6,6 +6,7 @@ var cardinalities = ['0-1', '1-1','1-N', '0-N', 'N-N', 'Altro'];
 var coverages = ['(t,e)', '(p,e)', '(t,s)', '(p,s)'];
 var currentElementSelected = null; 
 var linkClicked = null; // da togliere
+window.graphScale = 1; //l'ho resa una variabile globale così che tutte le funzioni possano modificarle direttamente senza modificarne una copia. 
 
 //mappe che contengono info che userò per creare il json da mostrare nel pannello laterale
 var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
@@ -490,4 +491,13 @@ paper.on('cell:pointerup blank:pointerup', function(event, x, y) {
         copyElements(graph, selectedElements.map(view => view.model),localStorage);
     }
 });
+
+
+
+//Aggiungo gli event listener per i bottoni di zoom.
+document.querySelector(".zoomIn").addEventListener('click', function(){ 
+    zoomIn(paper) });
+
+document.querySelector(".zoomOut").addEventListener('click', function(){ 
+    zoomOut(paper) });
 }); 
