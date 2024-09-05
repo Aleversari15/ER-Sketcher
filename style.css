@@ -261,6 +261,23 @@ footer button{
     color: white;
 }
 
+/* Stile per i pulsanti disabilitati */
+button.disabled, select.disabled {
+    opacity: 0.5; /* Rende il pulsante visivamente disabilitato */
+    pointer-events: none; /* Disabilita l'interazione */
+    cursor: not-allowed; /* Cambia il cursore */
+}
+
+button.disabled i {
+    pointer-events: none; /* Disabilita l'interazione sulle icone */
+}
+
+select.disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+
 .error-message {
     color: red;
     background-color: #f8d7da;
