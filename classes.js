@@ -43,6 +43,10 @@ class Entity {
         }
     }
 
+    getAttributes(){
+        return this.attributes;
+    }
+
 }
 
 //classe utile per salvare le informazioni riguardanti le associazioni e le varie entità e cardinalità 
@@ -50,6 +54,15 @@ class Association {
     constructor(name) {
         this.name = name;
         this.entitiesConnected = new Map();
+        this.attributes = [];
+    }
+
+    addAttribute(attribute){
+        this.attributes.push(attribute);
+    }
+
+    getAttributes(){
+        return this.attributes;
     }
 
     addEntityConnection(cell, cardinality) {

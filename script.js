@@ -9,8 +9,8 @@ var linkClicked = null; // da togliere
 window.graphScale = 1; //l'ho resa una variabile globale così che tutte le funzioni possano modificarle direttamente senza modificarne una copia. 
 
 //mappe che contengono info che userò per creare il json da mostrare nel pannello laterale
-var entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
-var relationsMap = new Map();
+window.entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
+window.relationsMap = new Map();
 var hierarchyMap = new Map();
 var subAttributesMap = new Map();
 
@@ -126,7 +126,7 @@ document.querySelector('.drawContainer').addEventListener('click', function(even
         });
         rect.addTo(graph);
         buttonEntitySelected = false; 
-        entitiesMap.set(rect, new Entity());
+        entitiesMap.set(rect.id, new Entity());
     }
     else if(buttonRelationSelected === true){
         var diamond = new joint.shapes.standard.Polygon();
@@ -207,7 +207,7 @@ document.querySelector('.closebtn').addEventListener('click', function(){
 // Aggiungi l'ascoltatore di eventi per il clic sulle shape
 paper.on('element:pointerdown', function(elementView) {
     if(shapeClicked!=elementView.model){
-        showCommandPalette(elementView.model);
+        showCommandPalette(elementView.model, entitiesMap, relationsMap, hierarchyMap, subAttributesMap);
         shapeClicked = elementView.model; 
     }
 });

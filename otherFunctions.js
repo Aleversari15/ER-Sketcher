@@ -1,55 +1,3 @@
-/*function copyElements(graph, elements,localStorage) {
-    const elementIds = elements.map(element => element.id);
-
-    console.log(elementIds);
-    const selectedCells = graph.getCells().filter(cell => elementIds.includes(cell.id));
-
-    const json = {
-        cells: selectedCells.map(cell => cell.toJSON())
-    };
-
-    localStorage.setItem('copiedElements', JSON.stringify(json));
-    console.log(localStorage);
-}
-
-
-function pasteElements(targetGraph,localStorage) {
-    const json = JSON.parse(localStorage.getItem('copiedElements'));
-
-    if (json && json.cells) {
-        console.log('JSON cells:', json.cells);  
-        const cells = json.cells.map(cellData => {
-            const CellType = joint.util.getByPath(joint.shapes, cellData.type, '.');
-            const newCell = new CellType();
-            newCell.position(cellData.position.x, cellData.position.y);
-            newCell.resize(cellData.size.width, cellData.size.height);
-            newCell.attr(cellData.attrs || {});
-            
-
-            return newCell;
-        });
-        targetGraph.addCells(cells);
-
-        // per evitare sovrapposizioni
-        cells.forEach(function(cell) {
-            cell.translate(50, 50);  
-        });
-
-        updateLinks(targetGraph, json.cells);
-    }
-}
-
-function updateLinks(targetGraph, copiedCells) {
-    // Ricrea i collegamenti tra le celle
-    copiedCells.forEach(cellData => {
-        if (cellData.type === 'link') {
-            const link = new joint.dia.Link();
-            link.from(cellData.source);
-            link.to(cellData.target);
-            targetGraph.addCell(link);
-        }
-    });
-}*/
 function copyElements(graph, elements, localStorage) {
     const elementIds = elements.map(element => element.id);
 
@@ -148,6 +96,95 @@ function zoomIn(paper){
 
 
 
+/**
+ * Metodo che fa apparire la palette dei comandi nel momento in cui una shape del diagramma viene selezionata. In base alla shape selezionata devono
+ * devono essere attivi sono i pulsanti realmente utilizzabili:
+ * entità ->  elimina,rinomina, aggiungi attributo, aggiungi attributo composto
+ * attributo -> elimina, rinomina, chiave
+ * attributo composto -> elimina, rinomina,aggiungi attributo 
+ * link -> elimina, aggiungi cardinalità 
+ * associazione -> attributo singolo, rinomina, elimina
+ * @param {*} shape è la figura selezionata
+ */
+function showCommandPalette(shape, entitiesMap) {
+    var palette = document.getElementsByClassName('command-palette')[0];
+    palette.style.display = 'block';
+    
+    // Selezione dei pulsanti
+    var deleteButton = document.querySelector('.delete-button');
+    var renameButton = document.querySelector('.rename-button');
+    var keyButton = document.querySelector('.key-button');
+    var attributeButton = document.querySelector('.attribute-button');
+    var subAttributeButton = document.querySelector('.subAttribute');
+    var composedIdButton = document.querySelector('.composedId');
+    var extIdButton = document.querySelector('.extId');
+    var hierarchyButton = document.querySelector('.hierarchy');
+    var cardinalitySelect = document.querySelector('.cardinality');
+    var coverageSelect = document.querySelector('.coverage');
+    
+    // Aggiungi la classe 'disabled' a tutti i bottoni di default
+    var buttons = [deleteButton, renameButton, keyButton, attributeButton, subAttributeButton, composedIdButton, 
+        extIdButton, hierarchyButton, cardinalitySelect, coverageSelect];
+    buttons.forEach(function(button) {
+        button.classList.add('disabled');
+    });
+    
+    // Abilita/disabilita in base alla shape selezionata
+    switch (shape.attributes.type) {
+        case 'standard.Rectangle': // Entità
+            deleteButton.classList.remove('disabled');
+            renameButton.classList.remove('disabled');
+            attributeButton.classList.remove('disabled');
+            subAttributeButton.classList.remove('disabled');
+            extIdButton.classList.remove('disabled'); //però prima di disegnarlo deve essere fatto controllo cardinalità (1-1)
+ 
+            console.log("numero attributi ",entitiesMap.get(shape.id).getAttributes().size)
+            //se ha più di un attributo composeIdButton deve essere abilitato
+            if(entitiesMap.get(shape.id) && entitiesMap.get(shape.id).getAttributes().size > 1){
+                composedIdButton.classList.remove('disabled');
+            }
+
+            //se sono state disegnate almeno due entità, hierarchy deve essere abilitato
+            if(entitiesMap.size >1){
+                hierarchyButton.classList.remove('disabled');
+            }
+
+
+            break;
+        case 'standard.Ellipse': // Attributo composto
+            deleteButton.classList.remove('disabled');
+            renameButton.classList.remove('disabled');
+            attributeButton.classList.remove('disabled');
+            break;
+        case 'standard.Polygon': // Associazione
+            deleteButton.classList.remove('disabled');
+            renameButton.classList.remove('disabled');
+            attributeButton.classList.remove('disabled'); //n alcuni casi dovrebbe essere disabilitato???
+            break;
+        case 'standard.Link': // Link
+            deleteButton.classList.remove('disabled');
+            cardinalitySelect.classList.remove('disabled');
+            //se è il link che collega la cella padre all'hub della genarchia anche il pulsante della cardinalità deve essere attivo
+            if(shape.getSourceCell().attributes.type === 'standard.Circle'){
+                hierarchyButton.classList.remove('disabled');
+            }
+            break;
+        case 'standard.Circle': // Associazione
+            deleteButton.classList.remove('disabled');
+            renameButton.classList.remove('disabled');
+            keyButton.classList.remove('disabled');
+            break;
+    }
+}
+
+
+
+
+
+function hideCommandPalette() {
+    var palette = document.getElementsByClassName('command-palette')[0];
+    palette.style.display = 'none';
+}
 
 
 

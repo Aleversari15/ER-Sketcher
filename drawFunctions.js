@@ -25,6 +25,13 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
 
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
     shape.embed(attribute);
+
+    if(shape.attributes.type === 'standard.Rectangle'){
+        entitiesMap.get(shape.id).addAttribute(attribute, null);
+    }
+    else if(shape.attributes.type === 'standard.Polygon'){
+        relationsMap.get(shape.id).addAttribute(attribute);
+    }
 }
 
 
@@ -199,89 +206,6 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
     graph.addCell(link);
 }
 
-
-
-
-
-/**
- * Metodo che fa apparire la palette dei comandi nel momento in cui una shape del diagramma viene selezionata. In base alla shape selezionata devono
- * devono essere attivi sono i pulsanti realmente utilizzabili:
- * entità ->  elimina,rinomina, aggiungi attributo, aggiungi attributo composto
- * attributo -> elimina, rinomina, chiave
- * attributo composto -> elimina, rinomina,aggiungi attributo 
- * link -> elimina, aggiungi cardinalità 
- * associazione -> attributo singolo, rinomina, elimina
- * @param {*} shape è la figura selezionata
- */
-function showCommandPalette(shape) {
-    var palette = document.getElementsByClassName('command-palette')[0];
-    palette.style.display = 'block';
-    
-    // Selezione dei pulsanti
-    var deleteButton = document.querySelector('.delete-button');
-    var renameButton = document.querySelector('.rename-button');
-    var keyButton = document.querySelector('.key-button');
-    var attributeButton = document.querySelector('.attribute-button');
-    var subAttributeButton = document.querySelector('.subAttribute');
-    var composedIdButton = document.querySelector('.composedId');
-    var extIdButton = document.querySelector('.extId');
-    var hierarchyButton = document.querySelector('.hierarchy');
-    var cardinalitySelect = document.querySelector('.cardinality');
-    var coverageSelect = document.querySelector('.coverage');
-    
-    // Aggiungi la classe 'disabled' a tutti i bottoni di default
-    var buttons = [deleteButton, renameButton, keyButton, attributeButton, subAttributeButton, composedIdButton, 
-        extIdButton, hierarchyButton, cardinalitySelect, coverageSelect];
-    buttons.forEach(function(button) {
-        button.classList.add('disabled');
-    });
-    
-    // Abilita/disabilita in base alla shape selezionata
-    switch (shape.attributes.type) {
-        case 'standard.Rectangle': // Entità
-            deleteButton.classList.remove('disabled');
-            renameButton.classList.remove('disabled');
-            attributeButton.classList.remove('disabled');
-            subAttributeButton.classList.remove('disabled');
-
-            extIdButton.classList.remove('disabled'); //però prima di disegnarlo deve essere fatto controllo cardinalità (1-1)
-
-            //se ha più di un attributo composeIdButton deve essere abilitato
-
-            //se sono state disegnate almeno due entità, hierarchy deve essere abilitato
-
-
-            break;
-        case 'standard.Ellipse': // Attributo composto
-            deleteButton.classList.remove('disabled');
-            renameButton.classList.remove('disabled');
-            attributeButton.classList.remove('disabled');
-            break;
-        case 'standard.Polygon': // Associazione
-            deleteButton.classList.remove('disabled');
-            renameButton.classList.remove('disabled');
-            attributeButton.classList.remove('disabled');
-            break;
-        case 'standard.Link': // Link
-            deleteButton.classList.remove('disabled');
-            cardinalitySelect.classList.remove('disabled');
-            break;
-        case 'standard.Circle': // Associazione
-            deleteButton.classList.remove('disabled');
-            renameButton.classList.remove('disabled');
-            keyButton.classList.remove('disabled');
-            break;
-    }
-}
-
-
-
-
-
-function hideCommandPalette() {
-    var palette = document.getElementsByClassName('command-palette')[0];
-    palette.style.display = 'none';
-}
 
 function setKey(shape){
     shape.attr('body/fill', 'black');
