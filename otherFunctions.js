@@ -53,6 +53,18 @@ function pasteElements(targetGraph, localStorage) {
 
         targetGraph.addCells(elements);
 
+        // Imposta la propiretà di embedding se necessario
+        json.cells.forEach(cellData => {
+            if (cellData.embeds && cellData.embeds.length > 0) {
+                const parentCell = targetGraph.getCell(idMap.get(cellData.id)); 
+                cellData.embeds.forEach(embedId => {
+                    const childCell = targetGraph.getCell(idMap.get(embedId)); 
+                    if (parentCell && childCell) {
+                        parentCell.embed(childCell); 
+                    }
+                });
+            }
+        });
 
         // Ora, aggiungi i link aggiornando gli ID di source e target utilizzando la mappa
         json.cells.filter(cellData => cellData.type === 'standard.Link').forEach(cellData => {
@@ -97,17 +109,25 @@ function pasteElements(targetGraph, localStorage) {
         //aggiungo gli attributi per ultimi, sennò rischio che le shape a cui si 
         //attaccano non siano ancora state aggiunte alle rispettive mappe.
         json.cells.filter(cellData => cellData.type === 'standard.Circle').forEach(cellData => {
-            
-            if(cellData.getParentCell().attributes.type === 'standard.Rectangle'){
-                entitiesMap.get(cellData.getParentCell().id).addAttribute(cellData);
-                //gestire caso chiave primaria
+            const parentId = idMap.get(cellData.parent.id);
+            const parentCell = targetGraph.getCell(parentId);
+
+            if (parentCell) {
+                switch(parentCell.attributes.type) {
+                    case 'standard.Rectangle': {
+                        entitiesMap.get(parentId).addAttribute(targetGraph.getCell(cellData));
+                        break;
+                    }
+                    case 'standard.Polygon': {
+                        relationsMap.get(parentId).addAttribute(targetGraph.getCell(idMap.get(cellData.id)));
+                        break;
+                    }
+                    case 'standard.Ellipse': {
+                        subAttributesMap.get(parentId).addSubAttribute(targetGraph.getCell(idMap.get(cellData.id)));
+                        break;
+                    }
+                }
             }
-            else if(cellData.getParentCell().attributes.type === 'standard.Polygon'){
-                relationsMap.get(cellData.getParentCell().id).addAttribute(cellData);
-            }  
-            else{
-                subAttributesMap.get(cellData.getParentCell().id).addSubAttribute(cellData);
-            }   
         });
     }
 }
@@ -179,7 +199,8 @@ function showCommandPalette(shape, entitiesMap) {
             subAttributeButton.classList.remove('disabled');
             extIdButton.classList.remove('disabled'); //però prima di disegnarlo deve essere fatto controllo cardinalità (1-1)
  
-            console.log("numero attributi ",entitiesMap.get(shape.id).getAttributes().size)
+            const entity = entitiesMap.get(shape.id);
+            console.log("entità selezioanta ", entity);
             //se ha più di un attributo composeIdButton deve essere abilitato
             if(entitiesMap.get(shape.id) && entitiesMap.get(shape.id).getAttributes().size > 1){
                 composedIdButton.classList.remove('disabled');
@@ -207,13 +228,15 @@ function showCommandPalette(shape, entitiesMap) {
             cardinalitySelect.classList.remove('disabled');
             //se è il link che collega la cella padre all'hub della genarchia anche il pulsante della cardinalità deve essere attivo
             if(shape.getSourceCell().attributes.type === 'standard.Circle'){
-                hierarchyButton.classList.remove('disabled');
+                coverageSelect.classList.remove('disabled');
             }
             break;
         case 'standard.Circle': // Associazione
             deleteButton.classList.remove('disabled');
             renameButton.classList.remove('disabled');
-            keyButton.classList.remove('disabled');
+            if(shape.getParentCell().attributes.type !== 'standard.Polygon'){
+                keyButton.classList.remove('disabled');
+            }
             break;
     }
 }
