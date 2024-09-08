@@ -11,8 +11,8 @@ window.graphScale = 1; //l'ho resa una variabile globale così che tutte le funz
 //mappe che contengono info che userò per creare il json da mostrare nel pannello laterale
 window.entitiesMap = new Map(); //chiave: id dell'entità, elemento: oggetto entity associato
 window.relationsMap = new Map();
-var hierarchyMap = new Map();
-var subAttributesMap = new Map();
+window.hierarchyMap = new Map();
+window.subAttributesMap = new Map();
 
 /*counters: alcuni counters andranno rimossi, basta controllare la lunghezza delle mappe*/
 var entityCounter = 0; 
@@ -360,7 +360,7 @@ document.querySelector('.loadFile').addEventListener('click', function() {
 });
 
 // Gestione del caricamento del file
-document.getElementById('fileInput').addEventListener('change', function(event) {
+/*document.getElementById('fileInput').addEventListener('change', function(event) {
     var file = event.target.files[0];
     if (file) {
         var reader = new FileReader();
@@ -375,9 +375,39 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
         };
         reader.readAsText(file);
     }
+});*/
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    var file = event.target.files[0];
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                var loadedData = JSON.parse(e.target.result);
+                
+                // Ripristina il grafo dal file JSON
+                if (loadedData.graph) {
+                    graph.fromJSON(loadedData.graph);
+                }
+
+                // Ripristina le mappe personalizzate utilizzando la funzione di importazione personalizzata
+                if (loadedData) {
+                    importFromJSON(e.target.result, graph);
+                }
+
+                console.log("Mappe personalizzate caricate correttamente");
+
+            } catch (error) {
+                console.error("Errore durante il parsing del file JSON:", error);
+                alert("Errore durante il caricamento del file. Assicurati che sia un file JSON valido.");
+            }
+        };
+        reader.readAsText(file);
+    }
 });
 
 
+
+//GESTIONE UNDO E REDO
 // Funzione per ottenere lo stato attuale del diagramma come JSON
 function saveCurrentState() {
     return JSON.stringify(graph.toJSON());
@@ -438,6 +468,7 @@ document.querySelector('.redo').addEventListener('click', function() {
 });
 
 
+//GESTIONE COPY AND PASTE
 document.addEventListener('keydown', function(event) {
     if (event.ctrlKey && event.key === 'v') {
         // Incolla gli elementi

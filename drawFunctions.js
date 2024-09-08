@@ -209,6 +209,12 @@ function createLinkBetweenEntities(shape1, shape2, graph) {
 
 function setKey(shape){
     shape.attr('body/fill', 'black');
+    var parentEntity = entitiesMap.get(shape.getParentCell().id);
+    if (parentEntity && typeof parentEntity.setId === 'function') {
+        parentEntity.setId([shape]);
+    } else {
+        console.error("Errore: entità non trovata o il metodo setId non esiste");
+    }
 
 }
 

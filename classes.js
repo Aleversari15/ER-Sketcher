@@ -8,10 +8,15 @@ class Entity {
     addId(id) {
         this.id.push(id);
     }
-
-    setId(ids){
-        this.id = ids; 
+    
+    setId(ids) {
+        if (Array.isArray(ids)) {
+            this.id = ids;
+        } else {
+            this.id = [ids];  // Se non è un array, lo converto in un array
+        }
     }
+    
 
     getId(){
         return this.id;
@@ -52,7 +57,6 @@ class Entity {
 //classe utile per salvare le informazioni riguardanti le associazioni e le varie entità e cardinalità 
 class Association {
     constructor(name) {
-        this.name = name;
         this.entitiesConnected = new Map();
         this.attributes = [];
     }
@@ -105,8 +109,7 @@ class Association {
 }
 
 class Generalization {
-    constructor(name) {
-        this.name = name;
+    constructor() {
         this.entitiesGeneralized = [];
         this.hub = null;
         this.coverage = '(t,e)';

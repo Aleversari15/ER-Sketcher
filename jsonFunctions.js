@@ -58,10 +58,11 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap, subAt
                 });
 
                 //stampo l'identificatore (singolo/composto/esterno)
-                var objEntity = entitiesMap.get(cell);
+                var objEntity = entitiesMap.get(cell.id);
+                console.log("Entità di riferimento: ", entitiesMap.get(cell.id))
                 if(objEntity){
                     var ids = [];
-                    objEntity.getId().forEach((idCell) => {
+                    (objEntity.getId()).forEach((idCell) => {
                         ids.push(idCell.attr('label/text') );
                     })
                     parent.Identifier.push(ids);  
@@ -132,7 +133,7 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap, subAt
 
 
 
-function downloadJson(graph, document){
+/*function downloadJson(graph, document){
     console.log('Hai cliccato download');
     var projectName = document.querySelector('.nomeProgetto').value;
     console.log('Nome progetto:', projectName); 
@@ -157,6 +158,40 @@ function downloadJson(graph, document){
     a.click();
     URL.revokeObjectURL(url);
 }
+*/
+function downloadJson(graph, document) {
+    var projectName = document.querySelector('.nomeProgetto').value;
+    if (!projectName) {
+        projectName = 'diagram_er';
+    }
+
+    // Ottieni i dati del grafo in formato JSON
+    var graphJSON = graph.toJSON();
+
+    // Converti le mappe in un formato serializzabile (array di coppie chiave-valore)
+    var exportData = {
+        graph: graphJSON,
+        entitiesMap: Array.from(window.entitiesMap.entries()),
+        relationsMap: Array.from(window.relationsMap.entries()),
+        hierarchyMap: Array.from(window.hierarchyMap.entries()),
+        subAttributesMap: Array.from(window.subAttributesMap.entries())
+    };
+
+    // Converti l'oggetto in stringa JSON
+    var dataStr = JSON.stringify(exportData, null, 2);
+    var blob = new Blob([dataStr], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+
+    // Crea un elemento <a> temporaneo per il download
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = projectName + '.json';
+
+    // Simula il click per avviare il download
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
 
 
 function getShapeJSON(shape) {
@@ -190,4 +225,169 @@ function updateJSONList(graph) {
     });
 
     hljs.highlightBlock(jsonContainer);
+}
+
+function importFromJSON(savedData, graph) {
+    // Parsing del JSON
+    var importedData;
+    try {
+        importedData = JSON.parse(savedData);
+    } catch (error) {
+        console.error("Errore durante il parsing del file JSON:", error);
+        alert("Errore durante il parsing del file JSON.");
+        return;
+    }
+
+    // Importiamo le celle nel grafico
+    if (importedData.graph) {
+        graph.fromJSON(importedData.graph);
+    } else {
+        console.warn("Dati del grafo non trovati nel JSON.");
+    }
+
+    // Ricostruzione della entitiesMap
+    entitiesMap.clear();  // Svuota la mappa prima di importare nuovi dati
+    if (importedData.entitiesMap) {
+        importedData.entitiesMap.forEach(([key, value]) => {
+            var newEntity = new Entity();
+
+            // Verifica che value.id sia definito e sia un array
+            if (value.id && Array.isArray(value.id)) {
+                // Recupera i riferimenti alle celle
+                var ids = value.id.map(cell => graph.getCell(cell.id));  // Usa cell.id per ottenere la cella
+                newEntity.setId(ids);
+            } else {
+                console.warn(`ID dell'entità non trovato o non valido per la chiave ${key}`);
+            }
+
+            // Ricostruisci gli attributi e le cardinalità
+            if (value.attributes) {
+                Object.entries(value.attributes).forEach(([attributeId, cardinality]) => {
+                    var attributeCell = graph.getCell(attributeId);  // Recupera la cella
+                    if (attributeCell) {
+                        newEntity.addAttribute(attributeCell, cardinality);
+                    } else {
+                        console.warn(`Attributo non trovato per ID ${attributeId}`);
+                    }
+                });
+            } else {
+                console.warn(`Attributi non trovati per la chiave ${key}`);
+            }
+
+            entitiesMap.set(key, newEntity);  // Aggiungi l'entità alla mappa
+        });
+    } else {
+        console.warn("Mappa delle entità non trovata nel JSON.");
+    }
+
+    // Ricostruzione della relationsMap
+    relationsMap.clear();
+    if (importedData.relationsMap) {
+        importedData.relationsMap.forEach(([key, value]) => {
+            var newAssociation = new Association(value.name);
+
+            // Ricostruisci le connessioni con le entità
+            if (value.entitiesConnected) {
+                value.entitiesConnected.forEach(([entityId, cardinality]) => {
+                    var entityCell = graph.getCell(entityId);
+                    if (entityCell) {
+                        newAssociation.addEntityConnection(entityCell, cardinality);
+                    } else {
+                        console.warn(`Entità non trovata per ID ${entityId}`);
+                    }
+                });
+            } else {
+                console.warn(`Connessioni con le entità non trovate per la chiave ${key}`);
+            }
+
+            // Ricostruisci gli attributi dell'associazione
+            if (value.attributes) {
+                value.attributes.forEach((attributeId) => {
+                    var attributeCell = graph.getCell(attributeId);
+                    if (attributeCell) {
+                        newAssociation.addAttribute(attributeCell);
+                    } else {
+                        console.warn(`Attributo non trovato per ID ${attributeId}`);
+                    }
+                });
+            } else {
+                console.warn(`Attributi non trovati per la chiave ${key}`);
+            }
+
+            relationsMap.set(key, newAssociation);
+        });
+    } else {
+        console.warn("Mappa delle associazioni non trovata nel JSON.");
+    }
+
+    // Ricostruzione della hierarchyMap
+    hierarchyMap.clear();
+    if (importedData.hierarchyMap) {
+        importedData.hierarchyMap.forEach(([key, value]) => {
+            var newGeneralization = new Generalization();
+
+            // Ricostruisci il coverage
+            if (value.coverage) {
+                newGeneralization.setCoverage(value.coverage);
+            } else {
+                console.warn(`Coverage non trovato per la chiave ${key}`);
+            }
+
+            // Ricostruisci l'hub
+            if (value.hub) {
+                var hubCell = graph.getCell(value.hub);
+                if (hubCell) {
+                    newGeneralization.setHub(hubCell);
+                } else {
+                    console.warn(`Hub non trovato per ID ${value.hub}`);
+                }
+            }
+
+            // Ricostruisci le entità generalizzate
+            if (value.entitiesGeneralized) {
+                value.entitiesGeneralized.forEach((entityId) => {
+                    var entityCell = graph.getCell(entityId);
+                    if (entityCell) {
+                        newGeneralization.addEntityGeneralization(entityCell);
+                    } else {
+                        console.warn(`Entità generalizzata non trovata per ID ${entityId}`);
+                    }
+                });
+            } else {
+                console.warn(`Entità generalizzate non trovate per la chiave ${key}`);
+            }
+
+            hierarchyMap.set(key, newGeneralization);
+        });
+    } else {
+        console.warn("Mappa delle gerarchie non trovata nel JSON.");
+    }
+
+    // Ricostruzione della subAttributesMap
+    subAttributesMap.clear();
+    if (importedData.subAttributesMap) {
+        importedData.subAttributesMap.forEach(([key, value]) => {
+            var newGroupAttribute = new groupAttribute();
+
+            // Ricostruisci i sub-attributi
+            if (value.subAttributes) {
+                value.subAttributes.forEach((subAttributeId) => {
+                    var subAttributeCell = graph.getCell(subAttributeId);
+                    if (subAttributeCell) {
+                        newGroupAttribute.addSubAttribute(subAttributeCell);
+                    } else {
+                        console.warn(`Sub-attributo non trovato per ID ${subAttributeId}`);
+                    }
+                });
+            } else {
+                console.warn(`Sub-attributi non trovati per la chiave ${key}`);
+            }
+
+            subAttributesMap.set(key, newGroupAttribute);
+        });
+    } else {
+        console.warn("Mappa dei sub-attributi non trovata nel JSON.");
+    }
+
+    console.log("Importazione completata con successo!");
 }

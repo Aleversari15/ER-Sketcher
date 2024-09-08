@@ -46,6 +46,9 @@ function pasteElements(targetGraph, localStorage) {
             idMap.set(cellData.id, newCell.id);
 
             return newCell;
+
+
+            
         });
 
         targetGraph.addCells(elements);
@@ -67,6 +70,44 @@ function pasteElements(targetGraph, localStorage) {
             });
 
             targetGraph.addCell(link);
+        });
+
+
+        //prima aggiungo tutte le entità alla mappa delle entities
+        json.cells.filter(cellData => cellData.type !== 'standard.Circle').forEach(cellData => {
+
+            switch(cellData.type){
+                case 'standard.Rectangle':{
+                    entitiesMap.set(cellData.id, new Entity());
+                    //gestire gerarchie: se è connessa a un cerchio con una freccia diversa da un link base allora si tratta di una gerarchia
+                    break;
+                }
+                case 'standard.Polygon':{
+                    relationsMap.set(cellData.id, new Association());
+                    break;
+                }
+                case 'standard.Ellipse':{
+                    subAttributesMap.set(cellData.id, new groupAttribute());
+                    break;
+                }
+            }
+            
+        });
+    
+        //aggiungo gli attributi per ultimi, sennò rischio che le shape a cui si 
+        //attaccano non siano ancora state aggiunte alle rispettive mappe.
+        json.cells.filter(cellData => cellData.type === 'standard.Circle').forEach(cellData => {
+            
+            if(cellData.getParentCell().attributes.type === 'standard.Rectangle'){
+                entitiesMap.get(cellData.getParentCell().id).addAttribute(cellData);
+                //gestire caso chiave primaria
+            }
+            else if(cellData.getParentCell().attributes.type === 'standard.Polygon'){
+                relationsMap.get(cellData.getParentCell().id).addAttribute(cellData);
+            }  
+            else{
+                subAttributesMap.get(cellData.getParentCell().id).addSubAttribute(cellData);
+            }   
         });
     }
 }
