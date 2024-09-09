@@ -99,7 +99,7 @@ function pasteElements(targetGraph, localStorage) {
                     break;
                 }
                 case 'standard.Ellipse':{
-                    subAttributesMap.set(cellData.id, new groupAttribute());
+                    subAttributesMap.set(cellData.id, new CompositeAttribute());
                     break;
                 }
             }
@@ -123,7 +123,7 @@ function pasteElements(targetGraph, localStorage) {
                         break;
                     }
                     case 'standard.Ellipse': {
-                        subAttributesMap.get(parentId).addSubAttribute(targetGraph.getCell(idMap.get(cellData.id)));
+                        subAttributesMap.get(parentId).addSubAttribute(targetGraph.getCell(idMap.get(cellData.id)), null); //bisognerebbe recuperare la cardinalità se era stata indicata
                         break;
                     }
                 }
@@ -232,12 +232,14 @@ function showCommandPalette(shape, entitiesMap) {
             }
             break;
         case 'standard.Circle': // Associazione
+        if(shape.attr('body/fill') !== 'red'){
             deleteButton.classList.remove('disabled');
             renameButton.classList.remove('disabled');
             if(shape.getParentCell().attributes.type !== 'standard.Polygon'){
                 keyButton.classList.remove('disabled');
             }
-            break;
+        }
+        break;
     }
 }
 

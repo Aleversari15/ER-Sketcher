@@ -311,7 +311,7 @@ paper.on('link:pointerclick', function(linkView) {
 // Gestisce il cambio del valore del menu a tendina per la cardinalità
 selectCardinality.addEventListener('change', function() {
     var value = selectCardinality.value;
-    updateLinkLabel(linkClicked, value, relationsMap,hierarchyMap); 
+    updateLinkLabel(linkClicked, value); 
     linkClicked = null;
     shapeClicked= null;
 });

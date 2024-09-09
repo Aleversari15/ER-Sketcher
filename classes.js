@@ -56,7 +56,7 @@ class Entity {
 
 //classe utile per salvare le informazioni riguardanti le associazioni e le varie entità e cardinalità 
 class Association {
-    constructor(name) {
+    constructor() {
         this.entitiesConnected = new Map();
         this.attributes = [];
     }
@@ -150,17 +150,31 @@ class Generalization {
     }
 }
 
-class groupAttribute{
-    constructor(){
-        this.subAttributes = [];
+class CompositeAttribute {
+    constructor() {
+        this.subAttributes = new Map();
     }
 
-    addSubAttribute(attribute){
-        this.subAttributes.push(attribute);
+    addSubAttribute(attribute, cardinality) {
+        this.subAttributes.set(attribute, cardinality);
     }
 
-    getSubAttributes(){
+    getSubAttributes() {
         return this.subAttributes;
     }
 
+    getCardinality(attribute) {
+        return this.subAttributes.has(attribute) ? this.subAttributes.get(attribute) : null;
+    }
+
+    removeSubAttribute(attribute) {
+        this.subAttributes.delete(attribute);
+    }
+
+    updateCardinality(attribute, newCardinality) {
+        if (this.subAttributes.has(attribute)) {
+            this.subAttributes.set(attribute, newCardinality); // Aggiorna la cardinalità
+            
+        }
+    }
 }

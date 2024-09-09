@@ -17,9 +17,9 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
     //se stiamo aggiungendo un attributo a un attributo con forma ellittica (subattributo) dobbiamo aggiungerlo alla mappa
     if(shape.attributes.type === 'standard.Ellipse'){
         if(!subAttributesMap.get(shape.id)){
-            subAttributesMap.set(shape.id, new groupAttribute());
+            subAttributesMap.set(shape.id, new CompositeAttribute());
         }
-        subAttributesMap.get(shape.id).addSubAttribute(attribute);
+        subAttributesMap.get(shape.id).addSubAttribute(attribute,null);
     }
     createLinkBetweenEntities(attribute, shape, graph);
 
@@ -239,10 +239,10 @@ function renameShape(shape, entities) {
     hideCommandPalette();
 }
 
-
 // Funzione per aggiornare la label del link in base alla scelta della cardinalità
-function updateLinkLabel(link, label,relationsMap, hierarchyMap) {
+function updateLinkLabel(link, label) {
     if (link) {
+        // Aggiorna la label visiva del link
         link.label(0, {
             position: 0.5,
             attrs: {
@@ -250,40 +250,72 @@ function updateLinkLabel(link, label,relationsMap, hierarchyMap) {
             }
         });
         console.log('Label del link cambiata in:', label);
-        
+
         var associations = null;
         var childToUpload = null;
         
-        if(link.getSourceCell().attributes.type === 'standard.Rectangle'){
-            //se l'id della cella source è contenuto nella mappa, allora è l'associazione e possiamo prendere il suo oggetto 
-            //associato e aggiornare la label per il json
-            if(relationsMap.get(link.getSourceCell().id)){
+        // Caso 1: Se la source è un rettangolo (entità)
+        if (link.getSourceCell().attributes.type === 'standard.Rectangle') {
+            if (relationsMap.get(link.getSourceCell().id)) {
                 associations = relationsMap.get(link.getSourceCell().id);
                 childToUpload = link.getTargetCell();
-            }
-            else if(relationsMap.get(link.getTargetCell().id)){
+            } else if (relationsMap.get(link.getTargetCell().id)) {
                 associations = relationsMap.get(link.getTargetCell().id);
                 childToUpload = link.getSourceCell();
             }
-            //se l'oggetto non è vuoto e quindi stiamo aggiornando la cardinalità di un'associazione 
+
+            // Se stiamo aggiornando la cardinalità di un'associazione
             if (associations) {
                 const entityConnections = associations.getAllEntityConnections();
                 entityConnections.forEach(([entity, cardinality]) => {
-                if(entity.id === childToUpload.id){
-                    associations.setCardinalityForEntityById(childToUpload.id, label);
-                }
+                    if (entity.id === childToUpload.id) {
+                        associations.setCardinalityForEntityById(childToUpload.id, label);
+                    }
                 });
             }
-        } 
-        //se si tratta di un link di una gerarchia (la sorgente è l'hub), allora aggiorno la copertura nel json 
-        else if (link.getSourceCell().attributes.type === 'standard.Circle'){
+
+        // Caso 2: Se la source è un cerchio (hub di una gerarchia)
+        } else if (link.getSourceCell().attributes.type === 'standard.Circle' && link.getSourceCell().attr('body/fill') === 'red') {
             var generalization = hierarchyMap.get(link.getTargetCell().id);
             generalization.setCoverage(label);
+
+        // Caso 3: Se il target o source è un'ellisse, modifica la cardinalità nel subAttributesMap
+        } else if (link.getSourceCell().attributes.type === 'standard.Ellipse' || 
+                   link.getTargetCell().attributes.type === 'standard.Ellipse') {
+
+            // Identifica la cella ellittica e l'altra cella collegata
+            var ellipseCell = link.getSourceCell().attributes.type === 'standard.Ellipse' 
+                ? link.getSourceCell() : link.getTargetCell();
+            var connectedCell = link.getSourceCell().attributes.type !== 'standard.Ellipse' 
+                ? link.getSourceCell() : link.getTargetCell();
+
+            // Debug: Assicurati che subAttributesMap sia definita e sia una Map
+            if (!subAttributesMap) {
+                console.error('subAttributesMap è undefined o null');
+            } else if (!(subAttributesMap instanceof Map)) {
+                console.error('subAttributesMap non è una Map');
+            } else {
+                console.log('subAttributesMap è definita correttamente');
+            }
+
+            // Cerca nella mappa subAttributesMap l'id dell'ellisse
+            if (ellipseCell && subAttributesMap.has(ellipseCell.id)) {
+                var subAttributesGroup = subAttributesMap.get(ellipseCell.id);
+
+                // Modifica la cardinalità del sub-attributo collegato usando il nuovo metodo
+                subAttributesGroup.getSubAttributes().forEach((currentCardinality, subAttribute) => {
+                    if (subAttribute.id === connectedCell.id) {
+                        subAttributesGroup.updateCardinality(subAttribute, label); // Aggiorna la cardinalità con il nuovo valore
+                        console.log(`Cardinalità aggiornata per ${subAttribute.attr('label/text')} a ${label}`);
+                    }
+                });
+            } else {
+                console.log(`Impossibile trovare l'ellisse o l'ID ${ellipseCell?.id} non esiste in subAttributesMap`);
+            }
+
+
         }
     } else {
         alert('Seleziona un link prima di cambiare la label.');
     }
 }
-
-
-

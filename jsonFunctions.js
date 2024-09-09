@@ -37,19 +37,28 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap, subAt
                         }
                         //se si tratta di un gruppo di attributi devo stampare anche tutti i singoli subattributi
                         else{
-                            var subAttributesList = subAttributesMap.get(child.id).getSubAttributes();
+                            var compositeAttribute = subAttributesMap.get(child.id);
+                            var subAttributesList = compositeAttribute.getSubAttributes();
+                            
                             var attributeGroup = {
                                 Attribute: child.attr('label/text'), // Nome del gruppo di attributi
                                 SubAttributes: []  // Lista di sub-attributi
                             };
-
-                            // Itera sui sub-attributi e aggiungili alla lista SubAttributes
-                            subAttributesList.forEach((a) => {
-                                attributeGroup.SubAttributes.push({
-                                    SubAttribute: a.attr('label/text')
-                                });
+            
+                            // Itera sulla mappa dei sub-attributi
+                            subAttributesList.forEach((cardinality, subAttribute) => {
+                                var subAttrObj = {
+                                    SubAttribute: subAttribute.attr('label/text')
+                                };
+            
+                                // Aggiungi il campo Cardinality solo se non è null
+                                if (cardinality !== null) {
+                                    subAttrObj.Cardinality = cardinality;
+                                }
+            
+                                attributeGroup.SubAttributes.push(subAttrObj);
                             });
-
+            
                             // Aggiungi il gruppo di attributi a Attributes
                             parent.Attributes.push(attributeGroup);
                         }
