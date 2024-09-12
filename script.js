@@ -583,6 +583,7 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     // Imposta l'intervallo per eseguire il controllo ogni 5 secondi
     setInterval(() => {
         checkEntitiesWithoutAttributes(graph);
+        checkEntitiesWithoutId(graph);
         checkDuplicateLabels();
     }, 5000); 
 }); 

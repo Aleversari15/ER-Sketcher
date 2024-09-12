@@ -337,4 +337,50 @@ function checkDuplicateLabels() {
 
 
 
+function checkEntitiesWithoutId(graph) { 
+    const entitiesDrawn = graph.getCells().filter(cell => cell.attributes.type === 'standard.Rectangle');
+    const links = graph.getLinks();
+    var hasErrors = false; 
+    var errorElement = document.getElementsByClassName('error-message')[0];
+
+    entitiesDrawn.forEach((e) => {
+        if (entitiesMap.get(e.id).getId().length === 0) {
+            var partOfHierarchy = false; 
+            links.forEach(l => {
+                // Verifica se l'entità è collegata a un cerchio rosso
+                const isSourceRedCircle = l.getSourceCell().attributes.type === 'standard.Circle' && l.getSourceCell().attr('body/fill') === 'red';
+                const isTargetRedCircle = l.getTargetCell().attributes.type === 'standard.Circle' && l.getTargetCell().attr('body/fill') === 'red';
+                if ((l.getSourceCell().id === e.id && isTargetRedCircle) || (l.getTargetCell().id === e.id && isSourceRedCircle)) {
+                    partOfHierarchy = true;
+                }
+            });
+
+            // Se non fa parte della gerarchia o è un'entità padre, è un errore
+            if (!partOfHierarchy || hierarchyMap.has(e.id)) {
+                hasErrors = true; 
+            } 
+        }
+    });
+
+    console.log("Ci sono errori? ", hasErrors);
+    
+    if (hasErrors) {
+        var errorMessage = "Errore: Sono presenti entità non generalizzate che non hanno un identificatore.";
+        console.log(errorMessage);
+        if (errorElement) {
+            console.log("Sono nell'if più interno");
+            errorElement.innerText = errorMessage;
+            errorElement.style.display = 'block';
+        } else {
+            console.error('Elemento di errore non trovato.');
+        }
+    } else {
+        if(errorElement.innerText=== ''){
+            errorElement.style.display = 'none';
+        }
+    }
+}
+
+
+
 
