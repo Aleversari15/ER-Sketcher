@@ -244,51 +244,55 @@ function showCommandPalette(shape, entitiesMap) {
 }
 
 
-
-
-
 function hideCommandPalette() {
     var palette = document.getElementsByClassName('command-palette')[0];
     palette.style.display = 'none';
 }
 
 
-//controlli sugli elementi disegnati 
-function checkEntitiesWithoutAttributes(graph) {
-    // Metto in una lista tutte le entità disegnate e in un'altra tutti i link 
+function checkEntitiesWithoutAttributes(graph) { 
     const entitiesDrawn = graph.getCells().filter(cell => cell.attributes.type === 'standard.Rectangle');
     const links = graph.getLinks();
+    var hasErrors = false; 
+    var errorElement = document.getElementsByClassName('error-message')[0];
 
-    entitiesDrawn.forEach((e) =>{
-        //se l'entità non ha attributi associati e non fa parte di una gerarchia, allora stampo un messaggio d'errore
-        if(entitiesMap.get(e.id).getAttributes().size === 0 ){
+    entitiesDrawn.forEach((e) => {
+        if (entitiesMap.get(e.id).getAttributes().size === 0) {
             var partOfHierarchy = false; 
             links.forEach(l => {
-                //se l'entità ha un link che la collega all'hub (cerchio rosso) allora potrebbe essere un'entità figlia (se non ha attributi va bene)
+                // Verifica se l'entità è collegata a un cerchio rosso
                 const isSourceRedCircle = l.getSourceCell().attributes.type === 'standard.Circle' && l.getSourceCell().attr('body/fill') === 'red';
                 const isTargetRedCircle = l.getTargetCell().attributes.type === 'standard.Circle' && l.getTargetCell().attr('body/fill') === 'red';
                 if ((l.getSourceCell().id === e.id && isTargetRedCircle) || (l.getTargetCell().id === e.id && isSourceRedCircle)) {
                     partOfHierarchy = true;
                 }
-            })
-            //se non fa parte della gerarchia o se è l'entità padre, l'errore va segnalato 
-           if(!partOfHierarchy || hierarchyMap.has(e.id)) {
-                   // Mostra il messaggio d'errore
-                var errorMessage = "Errore: Sono presenti entità non generalizzate senza attributi.";
-                var errorElement = document.getElementsByClassName('error-message')[0];
-                errorElement.innerText = errorMessage;
-                errorElement.style.display = 'block';
+            });
+
+            // Se non fa parte della gerarchia o è un'entità padre, è un errore
+            if (!partOfHierarchy || hierarchyMap.has(e.id)) {
+                hasErrors = true; 
             } 
-            else{
-                errorElement.style.display = 'none';
-            }
-
         }
-
     });
 
+    console.log("Ci sono errori? ", hasErrors);
+    
+    if (hasErrors) {
+        var errorMessage = "Errore: Sono presenti entità non generalizzate senza attributi.";
+        console.log(errorMessage);
+        if (errorElement) {
+            console.log("Sono nell'if più interno");
+            errorElement.innerText = errorMessage;
+            errorElement.style.display = 'block';
+        } else {
+            console.error('Elemento di errore non trovato.');
+        }
+    } else {
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+    }
 }
-
 
 function checkDuplicateLabels() {
     const errorEntities = new Map();
@@ -324,7 +328,10 @@ function checkDuplicateLabels() {
         
     } 
     else{
-        errorElement.style.display = 'none';
+        if(errorElement.innerText=== ''){
+            errorElement.style.display = 'none';
+        }
+        
     }
 }
 
