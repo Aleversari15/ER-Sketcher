@@ -207,7 +207,12 @@ document.querySelector('.closebtn').addEventListener('click', function(){
 // Aggiungi l'ascoltatore di eventi per il clic sulle shape
 paper.on('element:pointerdown', function(elementView) {
     if(shapeClicked!=elementView.model){
+        if(shapeClicked){
+            shapeClicked.attr('body/stroke-width', 1); 
+        }
+        
         showCommandPalette(elementView.model, entitiesMap, relationsMap, hierarchyMap, subAttributesMap);
+        elementView.model.attr('body/stroke-width', 3); 
         shapeClicked = elementView.model; 
     }
 });
@@ -599,4 +604,7 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
         checkEntitiesWithoutId(graph);
         checkDuplicateLabels();
     }, 5000); 
+
+    
+    
 }); 
