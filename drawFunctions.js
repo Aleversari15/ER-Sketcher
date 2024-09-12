@@ -21,7 +21,7 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
         }
         subAttributesMap.get(shape.id).addSubAttribute(attribute,null);
     }
-    createLinkBetweenEntities(attribute, shape, graph);
+    createLinkBetweenEntities(attribute, shape, graph, 'center', 'center');
 
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
     shape.embed(attribute);
@@ -184,14 +184,36 @@ function createBranchingLinks(parentShape, generalizedEnititesMap, graph, covera
 
 // Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
 function createLinkBetweenEntities(shape1, shape2, graph) {
-    var link = new joint.shapes.standard.Link;
-    link.source(shape1);
-    link.target(shape2);
+    var link = new joint.shapes.standard.Link();
+
+    var bbox1 = shape1.getBBox();
+    var bbox2 = shape2.getBBox();
+
+    link.source({
+        id: shape1.id,
+        anchor: {
+            name: 'center'  // Forza l'ancoraggio al centro della sorgente
+        },
+        connectionPoint: { name: 'bbox', args: { x: bbox1.center().x, y: bbox1.center().y} } // Fissa al centro del bounding box
+    });
+    
+    // Forza l'ancoraggio al centro della destinazione (cerchio o ellisse)
+    link.target({
+        id: shape2.id,
+        anchor: {
+            name: 'center'  // Forza l'ancoraggio al centro della destinazione
+        },
+        connectionPoint: { name: 'bbox', args:{ x: bbox2.center().x, y: bbox2.center().y} } // Fissa al centro del bounding box
+    });
+
     link.attr({
         line: {
+            stroke: 'black',
+            strokeWidth: 1,
             targetMarker: null
         }
     });
+
 
     //se sto collegando un'associazione ad un'entità allora imposto anche una cardinalità di default 
     if((shape1.attributes.type === 'standard.Rectangle' && shape2.attributes.type === 'standard.Polygon') || 
