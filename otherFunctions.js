@@ -253,4 +253,81 @@ function hideCommandPalette() {
 }
 
 
+//controlli sugli elementi disegnati 
+function checkEntitiesWithoutAttributes(graph) {
+    // Metto in una lista tutte le entità disegnate e in un'altra tutti i link 
+    const entitiesDrawn = graph.getCells().filter(cell => cell.attributes.type === 'standard.Rectangle');
+    const links = graph.getLinks();
+
+    entitiesDrawn.forEach((e) =>{
+        //se l'entità non ha attributi associati e non fa parte di una gerarchia, allora stampo un messaggio d'errore
+        if(entitiesMap.get(e.id).getAttributes().size === 0 ){
+            var partOfHierarchy = false; 
+            links.forEach(l => {
+                //se l'entità ha un link che la collega all'hub (cerchio rosso) allora potrebbe essere un'entità figlia (se non ha attributi va bene)
+                const isSourceRedCircle = l.getSourceCell().attributes.type === 'standard.Circle' && l.getSourceCell().attr('body/fill') === 'red';
+                const isTargetRedCircle = l.getTargetCell().attributes.type === 'standard.Circle' && l.getTargetCell().attr('body/fill') === 'red';
+                if ((l.getSourceCell().id === e.id && isTargetRedCircle) || (l.getTargetCell().id === e.id && isSourceRedCircle)) {
+                    partOfHierarchy = true;
+                }
+            })
+            //se non fa parte della gerarchia o se è l'entità padre, l'errore va segnalato 
+           if(!partOfHierarchy || hierarchyMap.has(e.id)) {
+                   // Mostra il messaggio d'errore
+                var errorMessage = "Errore: Sono presenti entità non generalizzate senza attributi.";
+                var errorElement = document.getElementsByClassName('error-message')[0];
+                errorElement.innerText = errorMessage;
+                errorElement.style.display = 'block';
+            } 
+            else{
+                errorElement.style.display = 'none';
+            }
+
+        }
+
+    });
+
+}
+
+
+function checkDuplicateLabels() {
+    const errorEntities = new Map();
+    
+    entitiesMap.forEach((entity, id) => {
+        const attributes = entity.getAttributes();
+        const labelCount = new Map();
+        attributes.forEach((cardinality, attribute) => {
+            if (attribute && attribute.attr) { 
+                const label = attribute.attr('label/text');
+                if (label) {
+                    labelCount.set(label, (labelCount.get(label) || 0) + 1);
+                }
+            }
+        });
+
+        const duplicateLabels = [...labelCount.entries()].filter(([label, count]) => count > 1);
+
+        if (duplicateLabels.length > 0) {
+            errorEntities.set(id, duplicateLabels);
+        }
+    });
+
+    var errorElement = document.getElementsByClassName('error-message')[0];
+    if (errorEntities.size > 0) {
+        let errorMessage = "Errore: Sono presenti attributi di una stessa entità che hanno lo stesso nome.";
+        
+        
+        if (errorElement) {
+            errorElement.innerText = errorMessage;
+            errorElement.style.display = 'block';
+        }
+        
+    } 
+    else{
+        errorElement.style.display = 'none';
+    }
+}
+
+
+
 

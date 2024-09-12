@@ -453,128 +453,136 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
 
 
 
-//GESTIONE UNDO E REDO
-// Funzione per ottenere lo stato attuale del diagramma come JSON
-function saveCurrentState() {
-    return JSON.stringify(graph.toJSON());
-}
-
-// Funzione per ripristinare lo stato del diagramma da un JSON
-function restoreState(json) {
-    graph.fromJSON(JSON.parse(json));
-}
-
-// Salva lo stato corrente nello stack di undo e ripulisce lo stack di redo
-function saveStateForUndo() {
-    undoStack.push(saveCurrentState());
-    redoStack = []; 
-}
-
-
-function undo() {
-    if (undoStack.length > 0) {
-        var currentState = saveCurrentState();
-        redoStack.push(currentState);
-
-        var previousState = undoStack.pop(); // Ripristina lo stato precedente
-        restoreState(previousState);
+    //GESTIONE UNDO E REDO
+    // Funzione per ottenere lo stato attuale del diagramma come JSON
+    function saveCurrentState() {
+        return JSON.stringify(graph.toJSON());
     }
-}
 
-
-function redo() {
-    if (redoStack.length > 0) {
-        var currentState = saveCurrentState(); 
-        undoStack.push(currentState);
-
-        var nextState = redoStack.pop(); // Ripristina lo stato successivo
-        restoreState(nextState);
+    // Funzione per ripristinare lo stato del diagramma da un JSON
+    function restoreState(json) {
+        graph.fromJSON(JSON.parse(json));
     }
-}
 
-
-graph.on('change', function(cell) {
-    saveStateForUndo();
-});
-
-graph.on('add', function(cell) {
-    saveStateForUndo();
-});
-
-graph.on('remove', function(cell) {
-    saveStateForUndo();
-});
-
-document.querySelector('.undo').addEventListener('click', function() {
-    undo();
-});
-
-document.querySelector('.redo').addEventListener('click', function() {
-    redo();
-});
-
-
-//GESTIONE COPY AND PASTE
-document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.key === 'v') {
-        // Incolla gli elementi
-        pasteElements(graph,localStorage);
+    // Salva lo stato corrente nello stack di undo e ripulisce lo stack di redo
+    function saveStateForUndo() {
+        undoStack.push(saveCurrentState());
+        redoStack = []; 
     }
-});
 
-// Evento di inizio trascinamento (mousedown)
-paper.on('blank:pointerdown', function(event, x, y) {
-    selectionStartPoint = { x, y };
-    selectionRect = new joint.shapes.standard.Rectangle();
-    selectionRect.position(x, y);
-    selectionRect.resize(1, 1);  
-    selectionRect.attr({
-        body: {
-            fill: 'rgba(0, 153, 255, 0.3)',
-            stroke: '#3399ff',
-            strokeWidth: 1,
-            strokeDasharray: '5,5'
+
+    function undo() {
+        if (undoStack.length > 0) {
+            var currentState = saveCurrentState();
+            redoStack.push(currentState);
+
+            var previousState = undoStack.pop(); // Ripristina lo stato precedente
+            restoreState(previousState);
+        }
+    }
+
+
+    function redo() {
+        if (redoStack.length > 0) {
+            var currentState = saveCurrentState(); 
+            undoStack.push(currentState);
+
+            var nextState = redoStack.pop(); // Ripristina lo stato successivo
+            restoreState(nextState);
+        }
+    }
+
+
+    graph.on('change', function(cell) {
+        saveStateForUndo();
+    });
+
+    graph.on('add', function(cell) {
+        saveStateForUndo();
+    });
+
+    graph.on('remove', function(cell) {
+        saveStateForUndo();
+    });
+
+    document.querySelector('.undo').addEventListener('click', function() {
+        undo();
+    });
+
+    document.querySelector('.redo').addEventListener('click', function() {
+        redo();
+    });
+
+
+    //GESTIONE COPY AND PASTE
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.key === 'v') {
+            // Incolla gli elementi
+            pasteElements(graph,localStorage);
         }
     });
-    selectionRect.addTo(graph);
-});
 
-// Evento di trascinamento (mousemove)
-paper.on('cell:pointermove blank:pointermove', function(event, x, y) {
-    if (!selectionStartPoint) return;
+    // Evento di inizio trascinamento (mousedown)
+    paper.on('blank:pointerdown', function(event, x, y) {
+        selectionStartPoint = { x, y };
+        selectionRect = new joint.shapes.standard.Rectangle();
+        selectionRect.position(x, y);
+        selectionRect.resize(1, 1);  
+        selectionRect.attr({
+            body: {
+                fill: 'rgba(0, 153, 255, 0.3)',
+                stroke: '#3399ff',
+                strokeWidth: 1,
+                strokeDasharray: '5,5'
+            }
+        });
+        selectionRect.addTo(graph);
+    });
 
-    const width = Math.abs(x - selectionStartPoint.x);
-    const height = Math.abs(y - selectionStartPoint.y);
-    const position = {
-        x: Math.min(x, selectionStartPoint.x),
-        y: Math.min(y, selectionStartPoint.y)
-    };
-    selectionRect.position(position.x, position.y);
-    selectionRect.resize(width, height);
-});
+    // Evento di trascinamento (mousemove)
+    paper.on('cell:pointermove blank:pointermove', function(event, x, y) {
+        if (!selectionStartPoint) return;
 
-// Evento di fine trascinamento (mouseup)
-paper.on('cell:pointerup blank:pointerup', function(event, x, y) {
-    if (!selectionStartPoint) return;
+        const width = Math.abs(x - selectionStartPoint.x);
+        const height = Math.abs(y - selectionStartPoint.y);
+        const position = {
+            x: Math.min(x, selectionStartPoint.x),
+            y: Math.min(y, selectionStartPoint.y)
+        };
+        selectionRect.position(position.x, position.y);
+        selectionRect.resize(width, height);
+    });
 
-    const selectionBBox = selectionRect.getBBox();
+    // Evento di fine trascinamento (mouseup)
+    paper.on('cell:pointerup blank:pointerup', function(event, x, y) {
+        if (!selectionStartPoint) return;
 
-    const selectedElements = paper.findViewsInArea(selectionBBox);
-    selectionRect.remove();
-    selectionRect = null;
-    selectionStartPoint = null;
+        const selectionBBox = selectionRect.getBBox();
 
-    if (selectedElements.length > 0) {
-        copyElements(graph, selectedElements.map(view => view.model),localStorage);
-    }
-});
+        const selectedElements = paper.findViewsInArea(selectionBBox);
+        selectionRect.remove();
+        selectionRect = null;
+        selectionStartPoint = null;
+
+        if (selectedElements.length > 0) {
+            copyElements(graph, selectedElements.map(view => view.model),localStorage);
+        }
+    });
 
 
 
-//Aggiungo gli event listener per i bottoni di zoom.
-document.querySelector(".zoomIn").addEventListener('click', function(){ 
-    zoomIn(paper) });
+    //Aggiungo gli event listener per i bottoni di zoom.
+    document.querySelector(".zoomIn").addEventListener('click', function(){ 
+        zoomIn(paper) });
 
-document.querySelector(".zoomOut").addEventListener('click', function(){ 
-    zoomOut(paper) });
+    document.querySelector(".zoomOut").addEventListener('click', function(){ 
+        zoomOut(paper) });
+
+
+    //GESTIONE CONTROLLI SUL DISEGNO
+    // Imposta l'intervallo per eseguire il controllo ogni 5 secondi
+    setInterval(() => {
+        checkEntitiesWithoutAttributes(graph);
+        checkDuplicateLabels();
+    }, 5000); 
 }); 
