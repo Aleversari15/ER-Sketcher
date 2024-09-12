@@ -274,7 +274,7 @@ function updateLinkLabel(link, label) {
             }
         });
         console.log('Label del link cambiata in:', label);
-        
+
         var linkLabel = link.label(0).attrs.text.text;
         console.log('Label attuale del link:', linkLabel);
 

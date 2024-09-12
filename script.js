@@ -320,10 +320,23 @@ paper.on('blank:pointerclick', function(){
         }
         
         var entity = linksSelected[0].getSourceCell().getParentCell();
-        var objEntity = entitiesMap.get(entity);
+        var objEntity = entitiesMap.get(entity.id);
         var attributes = [];
         linksSelected.forEach((l) => {
-            attributes.push(l.getSourceCell());
+            if(l.getSourceCell().attributes.type === 'standard.Circle'){
+                attributes.push(l.getSourceCell());
+            }
+            else{
+                var rel;
+                if(l.getSourceCell().attributes.type === 'standard.Polygon'){
+                    rel = l.getSourceCell();
+                }
+                else if(l.getTargetCell().attributes.type === 'standard.Polygon'){
+                    rel = l.getTargetCell();
+                }
+                attributes.push(rel);
+            }
+            
         })
         objEntity.setId(attributes);
         

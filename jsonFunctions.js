@@ -72,7 +72,13 @@ function getHierarchicalJSON(graph, relationsMap,hierarchyMap,entitiesMap, subAt
                 if(objEntity){
                     var ids = [];
                     (objEntity.getId()).forEach((idCell) => {
-                        ids.push(idCell.attr('label/text') );
+                        if(idCell.attributes.type === 'standard.Polygon'){
+                            ids.push('External identifier from ' + idCell.attr('label/text') );
+                        }
+                        else{
+                            ids.push(idCell.attr('label/text') );
+                        }
+                        
                     })
                     parent.Identifier.push(ids);  
                 }
