@@ -27,8 +27,8 @@ var selecting = false;
 
 //può essere un'entità, una relazione, un link o un'attributo
 var shapeClicked = null;
-var links=[];
-var linksId=[];
+var vertices=[];
+var linksSelected=[];
 
 
 //undo e redo
@@ -251,33 +251,85 @@ document.getElementsByClassName('subAttribute')[0].addEventListener('click', fun
     shapeClicked = null;
 })
 
+//gestione di eventi per il disegno di id esterni o composti
+document.querySelector('.extId').addEventListener('click', function(){
+    selecting = true; 
+    vertices=[];
+    linksSelected=[];
+})
+
+
 document.querySelector('.composedId').addEventListener('click', function(){
     selecting = true; 
-    links=[];
-    linksId=[];
+    vertices=[];
+    linksSelected=[];
 })
 
 paper.on('link:pointerdblclick', function(linkView) {
     if(selecting){
-        links.push(linkView.getBBox().center());
-        linksId.push(linkView.model);
+        vertices.push(linkView.getBBox().center());
+        linksSelected.push(linkView.model);
     }
 });
 
 paper.on('blank:pointerclick', function(){
     if(selecting === true){
-        createKeyFromLinks(links, graph, linksId, paper, toolsView); //modificare
-        var entity = linksId[0].getSourceCell().getParentCell();
+        var idExtAllowed = false;
+        var cointainsEXternalLink = false;
+
+        linksSelected.forEach((l) => {
+            if(l.getSourceCell().attributes.type === 'standard.Polygon' || l.getTargetCell().attributes.type === 'standard.Polygon'){
+                cointainsEXternalLink = true;
+            
+                if( l.label(0).attrs.text.text === '1-1'){ //anche (0,1)???
+                    idExtAllowed = true;
+                    
+                }
+            }
+        })
+
+        console.log("id esterno possibile: ", idExtAllowed);
+        console.log("Tentativo di creare id esterno: ", cointainsEXternalLink);
+
+
+        //richiesto ext id ed è possibile realizzarlo
+        if(idExtAllowed && cointainsEXternalLink){
+            console.log("stai creando un id esterno");
+            createKeyFromLinks(vertices, graph, linksSelected, paper, toolsView);
+            
+        }
+        else if( idExtAllowed === false && cointainsEXternalLink){
+            console.log("NON puoi creare un id esterno");
+             // Mostra il messaggio d'errore
+            var errorMessage = "Errore: Non è possibile creare un identificatore esterno per questa entità, la cardinalità del link è diversa da (1,1).";
+            var errorElement = document.getElementsByClassName('error-message')[0];
+            errorElement.innerText = errorMessage;
+            errorElement.style.display = 'block';
+
+            // Nascondi il messaggio dopo 5 secondi
+            setTimeout(function() {
+                errorElement.style.display = 'none';
+            }, 5000);
+
+            
+        }
+        else if(!cointainsEXternalLink){
+            console.log("stai creando un id composto");
+            createKeyFromLinks(vertices, graph, linksSelected, paper, toolsView);
+            
+        }
+        
+        var entity = linksSelected[0].getSourceCell().getParentCell();
         var objEntity = entitiesMap.get(entity);
         var attributes = [];
-        linksId.forEach((l) => {
+        linksSelected.forEach((l) => {
             attributes.push(l.getSourceCell());
         })
         objEntity.setId(attributes);
         
         selecting = false; 
-        links=[];
-        //devo svuotare anche il vettore linkId? cambiare nome 
+        linksSelected=[];
+        vertices = [];
     }
     
 } )
@@ -286,12 +338,6 @@ document.querySelector('.hierarchy').addEventListener('click', function(){
     selecting = true; 
     currentElementSelected = shapeClicked; //da sistemare 
     console.log("Entità selezionata: ", currentElementSelected);
-})
-
-document.querySelector('.extId').addEventListener('click', function(){
-    selecting = true; 
-    links=[];
-    linksId=[];
 })
 
 

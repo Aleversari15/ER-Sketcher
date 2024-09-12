@@ -43,7 +43,7 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
  * - paper
  * - toolsView */
 function createKeyFromLinks(vertices, graph, links, paper, toolsView){
-    var shape = graph.getCell(links[0]).getSourceCell().getParentCell(); //entità padre dei vari attributi da attraversare
+    var shape = graph.getCell(links[0].id).getSourceCell().getParentCell(); //entità padre dei vari attributi da attraversare
     var attributo = new joint.shapes.standard.Circle();
                 attributo.resize(20, 20);
                 attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
@@ -53,6 +53,8 @@ function createKeyFromLinks(vertices, graph, links, paper, toolsView){
     var endLink = vertices[vertices.length-1];
 
     var link = new joint.shapes.standard.Link();
+    link.connector({ name: 'smooth' }); //controllare??????
+
     link.source(attributo);
     link.target(endLink);
     link.router('metro'); 
@@ -272,6 +274,9 @@ function updateLinkLabel(link, label) {
             }
         });
         console.log('Label del link cambiata in:', label);
+        
+        var linkLabel = link.label(0).attrs.text.text;
+        console.log('Label attuale del link:', linkLabel);
 
         var associations = null;
         var childToUpload = null;
