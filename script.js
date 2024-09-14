@@ -271,11 +271,42 @@ document.querySelector('.composedId').addEventListener('click', function(){
 })
 
 paper.on('link:pointerdblclick', function(linkView) {
-    if(selecting){
-        vertices.push(linkView.getBBox().center());
+    if (selecting) {
+        // Ottieni la sorgente e la destinazione del link (coordinate)
+        var sourcePoint = linkView.sourceAnchor;
+        var targetPoint = linkView.targetAnchor;
+
+        // Controlla che siano definiti correttamente
+        if (!sourcePoint || !targetPoint) {
+            console.warn('I punti di origine o destinazione non sono definiti.');
+            return;
+        }
+
+        // Calcola il punto centrale tra origine e destinazione
+        var midPoint = {
+            x: (sourcePoint.x + targetPoint.x) / 2,
+            y: (sourcePoint.y + targetPoint.y) / 2
+        };
+
+        // Applica un offset per evitare il centro esatto
+        var offsetX = 20; // Sposta di 20 pixel lungo l'asse X
+        var offsetY = 10; // Sposta di 10 pixel lungo l'asse Y
+
+        // Crea il punto spostato
+        var shiftedPoint = {
+            x: midPoint.x + offsetX,
+            y: midPoint.y + offsetY
+        };
+
+        // Aggiungi il punto spostato ai vertici e seleziona il link
+        vertices.push(shiftedPoint);
         linksSelected.push(linkView.model);
+
+        // Debug: visualizza il punto calcolato nella console
+        console.log('Punto spostato:', shiftedPoint);
     }
 });
+
 
 paper.on('blank:pointerclick', function(){
     if(selecting === true){

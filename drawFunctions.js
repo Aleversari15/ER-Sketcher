@@ -21,7 +21,7 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
         }
         subAttributesMap.get(shape.id).addSubAttribute(attribute,null);
     }
-    createLinkBetweenEntities(attribute, shape, graph, 'center', 'center');
+    createLinkBetweenEntities(attribute, shape, graph);
 
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
     shape.embed(attribute);
@@ -34,53 +34,57 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
     }
 }
 
-
-/**Metodo che permette di creare un attributo passante attraverso più links. Viene utilizzato sia per creare un identificatore esterno, 
- * che per gli identificatori composti. Parametri:
- * - vertices: vettore contenenti i punti che si trovano esattamente al centro dei link da attraversare
- * - graph
- * - link: vettore che contiene i vari link da attraversare (l'intera cella)
- * - paper
- * - toolsView */
-function createKeyFromLinks(vertices, graph, links, paper, toolsView){
-    var shape = graph.getCell(links[0].id).getSourceCell().getParentCell(); //entità padre dei vari attributi da attraversare
+function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
+    var shape = graph.getCell(links[0].id).getSourceCell().getParentCell(); // Entità padre dei vari attributi da attraversare
     var attributo = new joint.shapes.standard.Circle();
-                attributo.resize(20, 20);
-                attributo.position(shape.position().x - (Math.random() * 100 +1), shape.position().y - (Math.random() * 100 + 40));
-                attributo.attr('root/title', 'joint.shapes.standard.Circle');
-                attributo.attr('body/fill', 'black');
-                graph.addCell(attributo);
-    var endLink = vertices[vertices.length-1];
+    attributo.resize(20, 20);
+    attributo.position(shape.position().x - (Math.random() * 100 + 1), shape.position().y - (Math.random() * 100 + 40));
+    attributo.attr('root/title', 'joint.shapes.standard.Circle');
+    attributo.attr('body/fill', 'black');
+    graph.addCell(attributo);
+
+    var endLink = graph.getCell(links[links.length - 1].id); // Usa l'ultimo link come destinazione finale
 
     var link = new joint.shapes.standard.Link();
-    link.connector({ name: 'smooth' }); //controllare??????
-
+    link.connector({ name: 'straight' });
     link.source(attributo);
     link.target(endLink);
-    link.router('metro'); 
+    link.router('metro');
     link.attr({
         line: {
             targetMarker: null
         }
     });
-   link.vertices(vertices);
-   for(i=0; i<links.length; i++){
-        const linkToReach = graph.getCell(links[i]);
-        linkToReach.vertices(vertices[i]);
-        
-   }
-    shape.embed(attributo); 
 
-    link.set('target', { id: links[links.length -1].id, selector: 'body' });
-    link.set('source', { id: attributo.id, selector: 'body' });
-    link.addTo(graph);
+    // Imposta i vertici per il link
+    link.vertices(vertices);
+    graph.addCell(link);
+
+    // Imposta i vertici per ogni link esistente
+    for (let i = 0; i < links.length; i++) {
+        const linkToReach = graph.getCell(links[i]);
+        if (i < vertices.length) {
+            linkToReach.vertices([vertices[i]]);
+        }
+    }
+
+    shape.embed(attributo);
+
 
     const linkView = link.findView(paper);
     linkView.addTools(toolsView);
     linkView.showTools();
+    
+    // Disabilita l'interazione con i vertici
+    linkView.options.interactive = function (cellView, eventName) {
+        // Disabilita interazioni sui vertici
+        if (eventName === 'vertex:add' || eventName === 'vertex:remove' || eventName === 'vertex:move') {
+            return false;
+        }
+        return true; // Permette altre interazioni
+    };
 
-    // Funzione per calcolare i punti medi dei link così da aggiornare dinamicamente 
-    //la posizione dei vertici durante lo spostamento della shape padre
+    // Funzione per aggiornare i vertici dinamicamente
     function updateVertices() {
         var newVertices = links.map(function (link) {
             var linkCell = graph.getCell(link);
@@ -89,12 +93,14 @@ function createKeyFromLinks(vertices, graph, links, paper, toolsView){
             return bbox.center(); 
         });
         link.vertices(newVertices);
-        for (var i = 0; i < links.length; i++) {
+
+        for (let i = 0; i < links.length; i++) {
             const linkToUpdate = graph.getCell(links[i]);
             linkToUpdate.vertices([newVertices[i]]);
         }
     }
 
+    // Aggiorna i vertici durante lo spostamento della shape padre
     shape.on('change:position', function () {
         updateVertices();
     });
@@ -184,51 +190,70 @@ function createBranchingLinks(parentShape, generalizedEnititesMap, graph, covera
 }
 
 
-// Funzione per connettere un'entità (rettangolo) e una associazione/relazione (rombo) 
+// Funzione per connettere un'entità (rettangolo/rombo) e un attributo (cerchio)
 function createLinkBetweenEntities(shape1, shape2, graph) {
     var link = new joint.shapes.standard.Link();
 
-    var bbox1 = shape1.getBBox();
-    var bbox2 = shape2.getBBox();
-
+    // Configura l'ancoraggio usando il connectionPoint 'boundary' per il shape1
     link.source({
         id: shape1.id,
-        anchor: {
-            name: 'center'  // Forza l'ancoraggio al centro della sorgente
+        connectionPoint: {
+            name: 'boundary', // Usa il confine della forma
+            args: {
+                offset: 0,        
+                insideout: false,  // Connessione dall'esterno
+                extrapolate: true, // Estendi il collegamento se necessario
+                sticky: true,      // Mantieni il collegamento anche se la forma si muove
+                precision: 3,      // Precisione del calcolo
+                stroke: true       // Considera anche lo spessore del bordo
+            }
         },
-        connectionPoint: { name: 'bbox', args: { x: bbox1.center().x, y: bbox1.center().y} } // Fissa al centro del bounding box
-    });
-    
-    // Forza l'ancoraggio al centro della destinazione (cerchio o ellisse)
-    link.target({
-        id: shape2.id,
-        anchor: {
-            name: 'center'  // Forza l'ancoraggio al centro della destinazione
-        },
-        connectionPoint: { name: 'bbox', args:{ x: bbox2.center().x, y: bbox2.center().y} } // Fissa al centro del bounding box
+        anchor: {name: 'modelCenter'}
     });
 
+    // Configura l'ancoraggio usando il connectionPoint 'boundary' per il shape2
+    link.target({
+        id: shape2.id,
+        connectionPoint: {
+            name: 'boundary', // Usa il confine della forma
+            args: {
+                offset: 0,        
+                insideout: false,  // Connessione dall'esterno
+                extrapolate: true, // Estendi il collegamento se necessario
+                sticky: true,      // Mantieni il collegamento anche se la forma si muove
+                precision: 3,      // Precisione del calcolo
+                stroke: true       // Considera anche lo spessore del bordo
+            }
+        },
+        anchor: {name: 'modelCenter'}
+    });
+
+    // Definisci lo stile del link
     link.attr({
         line: {
             stroke: 'black',
             strokeWidth: 1,
-            targetMarker: null
+            targetMarker: null // Rimuove il marcatore alla fine del link
         }
     });
 
-
-    //se sto collegando un'associazione ad un'entità allora imposto anche una cardinalità di default 
-    if((shape1.attributes.type === 'standard.Rectangle' && shape2.attributes.type === 'standard.Polygon') || 
-        (shape2.attributes.type === 'standard.Rectangle' && shape1.attributes.type === 'standard.Polygon')){
+    // Se collego un rettangolo (entità) a un poligono (relazione/associazione), aggiungo una cardinalità di default
+    if (
+        (shape1.attributes.type === 'standard.Rectangle' && shape2.attributes.type === 'standard.Polygon') ||
+        (shape2.attributes.type === 'standard.Rectangle' && shape1.attributes.type === 'standard.Polygon')
+    ) {
         link.label(0, {
             position: 0.5,
             attrs: {
-                text: { text: '1-N' }
+                text: { text: '1-N' }  // Cardinalità di default
             }
         });
     }
+
+    // Aggiungo il link al grafico
     graph.addCell(link);
 }
+
 
 
 function setKey(shape){
