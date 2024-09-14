@@ -26,6 +26,9 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
     //Dichiaro l'attributo come figlio della shape così da rendere più semplici e precise operazioni come spostamenti ed eliminazione.
     shape.embed(attribute);
 
+    attribute.on('change:position', function(){
+        updateLabelPosition(attribute, shape);    });
+
     if(shape.attributes.type === 'standard.Rectangle'){
         entitiesMap.get(shape.id).addAttribute(attribute, null);
     }
@@ -33,6 +36,44 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
         relationsMap.get(shape.id).addAttribute(attribute);
     }
 }
+
+
+function updateLabelPosition(attribute, shape) {
+    var attributePosition = attribute.position();
+    var shapePosition = shape.position();
+
+   
+    // Determina la posizione della label in base alla posizione relativa della shape
+    if (shapePosition.x < attributePosition.x) { // Shape a sinistra dell'attributo
+            // Imposta la posizione della label
+            console.log('Entità a sx');
+        attribute.attr('label/ref-x', +50 );
+        attribute.attr('label/ref-y',+10 );
+        attribute.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
+    } else if (shapePosition.x > attributePosition.x) { // Shape a destra dell'attributo
+        // Imposta la posizione della label
+        console.log('Entità a dx');
+        attribute.attr('label/ref-x', -50);
+        attribute.attr('label/ref-y', +10);
+        attribute.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
+    } else if (shapePosition.y < attributePosition.y) { // Shape sopra l'attributo
+        // Imposta la posizione della label
+        console.log('Entità sopra');
+        attribute.attr('label/ref-x',-20);
+        attribute.attr('label/ref-y', +20);
+        attribute.attr('label/x-alignment', 'middle');  // allineato verticalmente al centro
+    } else if(shapePosition.y > attributePosition.y) { // Shape sotto l'attributo
+        // Imposta la posizione della label
+        console.log('Entità sotto');
+        attribute.attr('label/ref-x', -20);
+        attribute.attr('label/ref-y',-20);
+        attribute.attr('label/x-alignment', 'middle');  // allineato verticalmente al centro
+    }
+
+    
+   
+}
+
 
 function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
     var shape = graph.getCell(links[0].id).getSourceCell().getParentCell(); // Entità padre dei vari attributi da attraversare
