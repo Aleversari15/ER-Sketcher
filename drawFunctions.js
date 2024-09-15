@@ -27,7 +27,10 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
     shape.embed(attribute);
 
     attribute.on('change:position', function(){
-        updateLabelPosition(attribute, shape);    });
+        if(attribute.attributes.type === 'standard.Circle'){
+            updateLabelPosition(attribute, shape); 
+        }
+           });
 
     if(shape.attributes.type === 'standard.Rectangle'){
         entitiesMap.get(shape.id).addAttribute(attribute, null);
@@ -76,11 +79,7 @@ function updateLabelPosition(attribute, shape) {
         attribute.attr('label/ref-y',-20);
         attribute.attr('label/x-alignment', 'middle');  
     }
-
-    
-   
 }
-
 
 function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
     var shape = graph.getCell(links[0].id).getSourceCell().getParentCell(); // Entità padre dei vari attributi da attraversare
@@ -118,19 +117,9 @@ function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
 
     shape.embed(attributo);
 
-
     const linkView = link.findView(paper);
     linkView.addTools(toolsView);
     linkView.showTools();
-    
-    // Disabilita l'interazione con i vertici
-    linkView.options.interactive = function (cellView, eventName) {
-        // Disabilita interazioni sui vertici
-        if (eventName === 'vertex:add' || eventName === 'vertex:remove' || eventName === 'vertex:move') {
-            return false;
-        }
-        return true; // Permette altre interazioni
-    };
 
     // Funzione per aggiornare i vertici dinamicamente
     function updateVertices() {
@@ -153,8 +142,10 @@ function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
         updateVertices();
     });
 
+    // Inizializza i vertici
     updateVertices();
 }
+
 
 /**
  * Metodo che permette di creare il collegamento tra l'entità padre e un'altra cella (in questo caso viene 
