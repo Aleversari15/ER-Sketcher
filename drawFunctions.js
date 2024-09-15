@@ -41,33 +41,40 @@ function addAttributeToShape(shape, graph, counter, type,subAttributesMap) {
 function updateLabelPosition(attribute, shape) {
     var attributePosition = attribute.position();
     var shapePosition = shape.position();
+    var shapeSize = shape.size();
 
+    console.log('Coordinata x entità ', shapePosition.x);
+    console.log('Coordinata y entità ', shapePosition.y);
+
+    console.log('Coordinata x attributo ', attributePosition.x);
+    console.log('Coordinata y attributo ', attributePosition.y);
    
-    // Determina la posizione della label in base alla posizione relativa della shape
-    if (shapePosition.x < attributePosition.x) { // Shape a sinistra dell'attributo
-            // Imposta la posizione della label
-            console.log('Entità a sx');
-        attribute.attr('label/ref-x', +50 );
+    // Shape a sinistra dell'attributo
+    if (shapePosition.x < attributePosition.x && attributePosition.x > (shapePosition.x + shapeSize.width)) { 
+        console.log('Entità a sx');
+        attribute.attr('label/ref-x', +60 );
         attribute.attr('label/ref-y',+10 );
-        attribute.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
-    } else if (shapePosition.x > attributePosition.x) { // Shape a destra dell'attributo
-        // Imposta la posizione della label
+        attribute.attr('label/y-alignment', 'middle'); 
+    } // Shape a destra dell'attributo
+    else if (shapePosition.x > attributePosition.x && (shapePosition.x > attributePosition.x)) { 
         console.log('Entità a dx');
         attribute.attr('label/ref-x', -50);
         attribute.attr('label/ref-y', +10);
-        attribute.attr('label/y-alignment', 'middle');  // allineato verticalmente al centro
-    } else if (shapePosition.y < attributePosition.y) { // Shape sopra l'attributo
-        // Imposta la posizione della label
+        attribute.attr('label/y-alignment', 'middle');  
+    } // Shape sopra l'attributo
+    else if (shapePosition.y < attributePosition.y && 
+            (shapePosition.x <= attributePosition.x && attributePosition.x <= (shapePosition.x + shapeSize.width))) { 
         console.log('Entità sopra');
-        attribute.attr('label/ref-x',-20);
-        attribute.attr('label/ref-y', +20);
-        attribute.attr('label/x-alignment', 'middle');  // allineato verticalmente al centro
-    } else if(shapePosition.y > attributePosition.y) { // Shape sotto l'attributo
-        // Imposta la posizione della label
+        attribute.attr('label/ref-x', +5);
+        attribute.attr('label/ref-y', +30);
+        attribute.attr('label/x-alignment', 'middle'); 
+    } // Shape sotto l'attributo
+    else if(shapePosition.y > attributePosition.y && 
+            (shapePosition.x <= attributePosition.x && attributePosition.x <= (shapePosition.x + shapeSize.width))){ 
         console.log('Entità sotto');
-        attribute.attr('label/ref-x', -20);
+        attribute.attr('label/ref-x', +5);
         attribute.attr('label/ref-y',-20);
-        attribute.attr('label/x-alignment', 'middle');  // allineato verticalmente al centro
+        attribute.attr('label/x-alignment', 'middle');  
     }
 
     
