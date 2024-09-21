@@ -16,6 +16,7 @@ main {
     overflow: hidden;
 
 }
+
 .drawContainer {
     flex: 1;
     overflow: auto;
@@ -59,8 +60,15 @@ body>header{
     align-items: center;
 }
 
+.barraIntestazione form{
+    flex-grow: 1;                 
+    text-align: center;                
+    margin-left: auto;           
+    margin-right: auto;                 
+}
+
 .barraIntestazione>img{
-    width: 15%;
+    width: 12%;
     
 }
 
@@ -78,6 +86,9 @@ body>header{
 
 .pulsantiSalvataggio{
     height: 100%;
+    display: flex;   
+    justify-content: flex-end;            
+    width:12%;
     
 }
 
@@ -129,6 +140,7 @@ footer{
 .pulsantiSalvataggio button{
     border:none;
     background-color: white;
+    margin-left: 10px;
 }
 
 .barraComandi>button{
@@ -143,6 +155,7 @@ footer{
     background-color:#c8a2c8;
     border-radius: 5pt;
     border:none;
+    margin:0;
 }
 
 button{
@@ -189,6 +202,11 @@ footer button{
     background-color:rgb(99, 13, 99);
     color: white;
     font-size: 12pt;
+    width:8%;
+  }
+
+  .space{
+    width: 8%;
   }
   
   .openbtn:hover {
