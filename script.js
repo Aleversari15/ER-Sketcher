@@ -612,6 +612,11 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     document.querySelector(".zoomOut").addEventListener('click', function(){ 
         zoomOut(paper) });
 
+    // Aggiungi un pulsante per esportare il diagramma in PNG
+    document.querySelector('.export').addEventListener('click', function() {
+    
+        exportDiagramAsPNG(paper);
+    });
 
     //GESTIONE CONTROLLI SUL DISEGNO
     // Imposta l'intervallo per eseguire il controllo ogni 5 secondi

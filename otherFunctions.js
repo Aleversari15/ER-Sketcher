@@ -44,11 +44,7 @@ function pasteElements(targetGraph, localStorage) {
 
             // Salva il mapping degli ID
             idMap.set(cellData.id, newCell.id);
-
             return newCell;
-
-
-            
         });
 
         targetGraph.addCells(elements);
@@ -87,26 +83,66 @@ function pasteElements(targetGraph, localStorage) {
 
         //prima aggiungo tutte le entità alla mappa delle entities
         json.cells.filter(cellData => cellData.type !== 'standard.Circle').forEach(cellData => {
-
+            var newCellid = idMap.get(cellData.id); //recupero l'id della cella appena creata
             switch(cellData.type){
                 case 'standard.Rectangle':{
-                    entitiesMap.set(cellData.id, new Entity());
-                    //gestire gerarchie: se è connessa a un cerchio con una freccia diversa da un link base allora si tratta di una gerarchia
+                    var original =entitiesMap.get(cellData.id); //recuper l'oggetto Entity corrispondente alla vecchia cella
+                    entitiesMap.set(newCellid, new Entity());
+                    var copy = entitiesMap.get(newCellid);
+
+                    //aggingo al nuovo oggetto tutti gli attributi
+                    var attributesToCopy = original.getAttributes();
+                    attributesToCopy.forEach(a => {
+                        copy.addAttribute(idMap.get(a.id), attributesToCopy.getCardinality(a));
+                    });
+                    //setto l'identificatore
+                    var idToCopy = original.getId();
+                    idToCopy.forEach(id => {
+                        copy.addId(idMap.get(id.id));
+                    });
+
+                    //se la cella copiata era un'entità padre, allora anche la cella appena incollata dovrà essere inserita nella mappa delle gerarchie
+                    if(hierarchyMap.has(cellData.id)){
+                        var entityGeneralizedOriginal = hierarchyMap.get(cellData.id);
+                        hierarchyMap.set(newCellid, new Generalization());
+                        var copyGeneralization = hierarchyMap.get(newCellid);
+                        entityGeneralizedOriginal.forEach(e =>{
+                            copyGeneralization.addEntityGeneralization(idMap.get(e.id));
+                        });
+                        copyGeneralization.setCoverage(entityGeneralizedOriginal.getCoverage());
+                    }
                     break;
                 }
                 case 'standard.Polygon':{
-                    relationsMap.set(cellData.id, new Association());
+                    relationsMap.set(newCellid, new Association());
+                    var original = relationsMap.get(cellData.id);
+                    var copy = relationsMap.get(newCellid);
+                    var entitiesList = original.getAllEntityConnections();
+                    var attributesList = original.getAttributes();
+                    entitiesList.forEach((e,c) =>{
+                        copy.addEntityConnection(idMap.get(e.id), c);
+                    });
+
+                    attributesList.forEach(a => {
+                        copy.addAttribute(idMap.get(a.id));
+                    });
+
                     break;
                 }
                 case 'standard.Ellipse':{
-                    subAttributesMap.set(cellData.id, new CompositeAttribute());
+                    subAttributesMap.set(newCellid, new CompositeAttribute());
+                    var original = subAttributesMap.get(cellData.id);
+                    var copy = subAttributesMap.get(newCellid);
+                    original.getSubAttributes().forEach((a,c) => {
+                        copy.addSubAttribute(idMap.get(a.id), c);
+                    });
                     break;
                 }
             }
             
         });
     
-        //aggiungo gli attributi per ultimi, sennò rischio che le shape a cui si 
+        /*//aggiungo gli attributi per ultimi, sennò rischio che le shape a cui si 
         //attaccano non siano ancora state aggiunte alle rispettive mappe.
         json.cells.filter(cellData => cellData.type === 'standard.Circle').forEach(cellData => {
             const parentId = idMap.get(cellData.parent.id);
@@ -128,7 +164,8 @@ function pasteElements(targetGraph, localStorage) {
                     }
                 }
             }
-        });
+        });*/
+
     }
 }
 
@@ -381,6 +418,61 @@ function checkEntitiesWithoutId(graph) {
     }
 }
 
+function exportDiagramAsPNG() {
+    var svgElement = document.querySelector('svg');
+    
+    // Forza dimensioni fisse
+    svgElement.setAttribute('width', '1500');
+    svgElement.setAttribute('height', '800');
 
+    // Nascondi la griglia
+    var gridLayer = document.querySelector('.joint-grid-layer');
+    if (gridLayer) {
+        gridLayer.style.display = 'none';
+    }
 
+    // Serializza l'SVG in una stringa
+    var svgData = new XMLSerializer().serializeToString(svgElement);
+    
+    // Crea un canvas su cui verrà renderizzato l'SVG
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
 
+    // Usa un'immagine temporanea per caricare l'SVG
+    var img = new Image();
+    var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(svgBlob);
+
+    img.onload = function() {
+        // Imposta le dimensioni del canvas
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Aggiungi un colore di sfondo bianco
+        context.fillStyle = 'white';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Disegna l'immagine SVG sul canvas
+        context.drawImage(img, 0, 0);
+        
+        // Converti il contenuto del canvas in PNG
+        var pngData = canvas.toDataURL('image/png');
+
+        // Crea un link per scaricare l'immagine PNG
+        var a = document.createElement('a');
+        a.href = pngData;
+        a.download = 'diagram.png';
+        document.body.appendChild(a);
+        a.click();
+
+        // Rilascia l'URL temporaneo
+        URL.revokeObjectURL(url);
+
+        // Ripristina la visibilità della griglia
+        if (gridLayer) {
+            gridLayer.style.display = 'block';
+        }
+    };
+
+    img.src = url;
+}
