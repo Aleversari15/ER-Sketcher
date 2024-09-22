@@ -183,7 +183,7 @@ paper.on('element:pointerdblclick', function(cellView) {
             hierarchyMap.set(cell.id, new Generalization());
         }
         var gen = hierarchyMap.get(cell.id);
-        gen.addEntityGeneralization(currentElementSelected, '(t,e)');
+        gen.addEntityGeneralization(currentElementSelected);
 
         //controllare
         createBranchingLinks(cell, hierarchyMap.get(cell.id), graph, '(t,e)');
@@ -423,6 +423,12 @@ selectCoverage.addEventListener('change', function() {
     var generalization = hierarchyMap.get(entity.id);
     console.log("Entità padre: ", entity.attr("label/text"));
     console.log("Generalizzazione: ", generalization);
+    
+    console.log("Source Cell: ", linkClicked.getSourceCell());
+    console.log("Target Cell: ", entity);
+    console.log("Hub della generalizzazione: ", generalization.getHub());
+
+
     if(generalization && linkClicked.getSourceCell().id === generalization.getHub().id){
         updateLinkLabel(linkClicked, value, relationsMap, hierarchyMap);
     }

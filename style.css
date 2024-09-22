@@ -209,13 +209,10 @@ footer button{
     width: 8%;
   }
   
-  .openbtn:hover {
+  .openbtn:hover,footer button:hover {
     background-color: #444;
   }
 
-  footer button:hover{
-    background-color: #444;
-  }
 
   ul{
     list-style: none;

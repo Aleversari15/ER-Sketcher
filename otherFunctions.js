@@ -62,7 +62,6 @@ function pasteElements(targetGraph, localStorage) {
             }
         });
 
-        // Ora, aggiungi i link aggiornando gli ID di source e target utilizzando la mappa
         json.cells.filter(cellData => cellData.type === 'standard.Link').forEach(cellData => {
             const link = new joint.shapes.standard.Link({
                 source: {
@@ -76,9 +75,16 @@ function pasteElements(targetGraph, localStorage) {
                 connector: cellData.connector,
                 attrs: cellData.attrs || {}
             });
-
+        
+            // Aggiungi la copia delle labels se esistono
+            if (cellData.labels) {
+                link.set('labels', cellData.labels);
+            }
+        
             targetGraph.addCell(link);
+
         });
+        
 
 
         //prima aggiungo tutte le entità alla mappa delle entities
@@ -103,13 +109,17 @@ function pasteElements(targetGraph, localStorage) {
 
                     //se la cella copiata era un'entità padre, allora anche la cella appena incollata dovrà essere inserita nella mappa delle gerarchie
                     if(hierarchyMap.has(cellData.id)){
-                        var entityGeneralizedOriginal = hierarchyMap.get(cellData.id);
+                        var originalGeneralization = hierarchyMap.get(cellData.id);
+                        var entityGeneralizedOriginal = originalGeneralization.getAllEntityGeneralizations();
                         hierarchyMap.set(newCellid, new Generalization());
                         var copyGeneralization = hierarchyMap.get(newCellid);
+                        
                         entityGeneralizedOriginal.forEach(e =>{
-                            copyGeneralization.addEntityGeneralization(idMap.get(e.id));
+                            var cell = targetGraph.getCell(idMap.get(e.id));
+                            copyGeneralization.addEntityGeneralization(cell);
                         });
-                        copyGeneralization.setCoverage(entityGeneralizedOriginal.getCoverage());
+                        copyGeneralization.setCoverage(originalGeneralization.getCoverage());
+                        
                     }
                     break;
                 }
@@ -138,33 +148,31 @@ function pasteElements(targetGraph, localStorage) {
                     });
                     break;
                 }
+                case 'standard.Link': {
+                    // Recupera le celle sorgente e destinazione usando gli ID mappati
+                    var sourceId = idMap.get(cellData.source.id);
+                    var targetId = idMap.get(cellData.target.id);
+                    
+                    // Assicurati che le celle mappate esistano
+                    if (sourceId && targetId) {
+                        var sourceCell = targetGraph.getCell(sourceId);
+                        var targetCell = targetGraph.getCell(targetId);
+                        
+                        // Verifica se la sorgente è un cerchio rosso (gerarchia) e la destinazione è una cella in hierarchyMap
+                        if (sourceCell && sourceCell.attributes.type === 'standard.Circle' && hierarchyMap.has(targetCell.id)) {
+                            var generalization = hierarchyMap.get(targetCell.id);
+                            generalization.setHub(sourceCell);  // Imposta il cerchio come hub della generalizzazione
+                        }
+                    } else {
+                        console.warn("Impossibile trovare la sorgente o la destinazione del link.");
+                    }
+                    break;
+                }
+                
+                
             }
             
         });
-    
-        /*//aggiungo gli attributi per ultimi, sennò rischio che le shape a cui si 
-        //attaccano non siano ancora state aggiunte alle rispettive mappe.
-        json.cells.filter(cellData => cellData.type === 'standard.Circle').forEach(cellData => {
-            const parentId = idMap.get(cellData.parent.id);
-            const parentCell = targetGraph.getCell(parentId);
-
-            if (parentCell) {
-                switch(parentCell.attributes.type) {
-                    case 'standard.Rectangle': {
-                        entitiesMap.get(parentId).addAttribute(targetGraph.getCell(cellData));
-                        break;
-                    }
-                    case 'standard.Polygon': {
-                        relationsMap.get(parentId).addAttribute(targetGraph.getCell(idMap.get(cellData.id)));
-                        break;
-                    }
-                    case 'standard.Ellipse': {
-                        subAttributesMap.get(parentId).addSubAttribute(targetGraph.getCell(idMap.get(cellData.id)), null); //bisognerebbe recuperare la cardinalità se era stata indicata
-                        break;
-                    }
-                }
-            }
-        });*/
 
     }
 }
