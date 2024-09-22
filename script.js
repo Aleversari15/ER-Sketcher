@@ -48,25 +48,6 @@ var paper = new joint.dia.Paper({
 });
 
 
-const verticesTool = new joint.linkTools.Vertices({
-    attrs: {
-        '.vertex': {
-            r: 8,  // Raggio del cerchio del vertice
-            fill: 'red',  // Colore di riempimento del vertice
-            stroke: 'black',  // Colore del bordo del vertice
-            'stroke-width': 2  // Spessore del bordo del vertice
-        }
-    }
-});
-
-
-
-// Applicare lo strumento di vertici personalizzato al collegamento
-const toolsView = new joint.dia.ToolsView({
-    tools: [verticesTool]
-});
-
-
 // Popola il menu a tendina con le opzioni del vettore cardinalities
 var selectCardinality = document.getElementsByClassName('cardinality')[0];
 cardinalities.forEach(function(value) {
@@ -332,7 +313,7 @@ paper.on('blank:pointerclick', function(){
         //richiesto ext id ed è possibile realizzarlo
         if(idExtAllowed && cointainsEXternalLink){
             console.log("stai creando un id esterno");
-            createKeyFromLinks(vertices, graph, linksSelected, paper, toolsView);
+            createKeyFromLinks(vertices, graph, linksSelected, paper);
             
         }
         else if( idExtAllowed === false && cointainsEXternalLink){
@@ -352,7 +333,7 @@ paper.on('blank:pointerclick', function(){
         }
         else if(!cointainsEXternalLink){
             console.log("stai creando un id composto");
-            createKeyFromLinks(vertices, graph, linksSelected, paper, toolsView);
+            createKeyFromLinks(vertices, graph, linksSelected, paper);
             
         }
         

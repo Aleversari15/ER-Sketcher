@@ -81,8 +81,10 @@ function updateLabelPosition(attribute, shape) {
     }
 }
 
-function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
+
+function createKeyFromLinks(vertices, graph, links, paper) {
     var shape = graph.getCell(links[0].id).getSourceCell().getParentCell(); // Entità padre dei vari attributi da attraversare
+
     var attributo = new joint.shapes.standard.Circle();
     attributo.resize(20, 20);
     attributo.position(shape.position().x - (Math.random() * 100 + 1), shape.position().y - (Math.random() * 100 + 40));
@@ -96,7 +98,6 @@ function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
     link.connector({ name: 'straight' });
     link.source(attributo);
     link.target(endLink);
-    link.router('metro');
     link.attr({
         line: {
             targetMarker: null
@@ -107,18 +108,23 @@ function createKeyFromLinks(vertices, graph, links, paper, toolsView) {
     link.vertices(vertices);
     graph.addCell(link);
 
-    // Imposta i vertici per ogni link esistente
-    for (let i = 0; i < links.length; i++) {
-        const linkToReach = graph.getCell(links[i]);
-        if (i < vertices.length) {
-            linkToReach.vertices([vertices[i]]);
-        }
-    }
-
     shape.embed(attributo);
 
+    var verticesTool = new joint.linkTools.Vertices({
+        focusOpacity: 0.5,
+        redundancyRemoval: false,
+        snapRadius: 10,
+        vertexAdding: false,
+        vertexMoving: false
+    });
+        // Crea il tool per gestire i vertici
+    var tools = new joint.dia.ToolsView({
+        tools: [
+            verticesTool
+        ]
+    });
     const linkView = link.findView(paper);
-    linkView.addTools(toolsView);
+    linkView.addTools(tools);
     linkView.showTools();
 
     // Funzione per aggiornare i vertici dinamicamente

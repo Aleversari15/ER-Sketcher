@@ -4,20 +4,47 @@ function copyElements(graph, elements, localStorage) {
     console.log(elementIds);
     const selectedCells = graph.getCells().filter(cell => elementIds.includes(cell.id));
 
-    // Includi i link associati alle celle selezionate
-    const selectedLinks = graph.getLinks().filter(link => {
-        const sourceId = link.get('source').id;
-        const targetId = link.get('target').id;
-        return elementIds.includes(sourceId) || elementIds.includes(targetId);
+    // Filtra i link che non hanno vertici
+    const linksWithVertices = graph.getLinks().filter(link => {
+        const hasVertices = link.get('vertices') && link.get('vertices').length > 0;
+        return hasVertices;
     });
 
+    // Estrai gli ID delle celle collegate ai link con vertici
+    const cellsConnectedToLinksWithVertices = linksWithVertices.reduce((acc, link) => {
+        acc.add(link.get('source').id);
+        acc.add(link.get('target').id);
+        return acc;
+    }, new Set());
+
+    // Filtra le celle selezionate ed escludi i 'standard.Circle' di colore nero collegati a link con vertici
+    const filteredCells = selectedCells.filter(cell => {
+        const isBlackCircle = cell.attributes.type === 'standard.Circle' && cell.attr('body/fill') === 'black';
+        const isConnectedToLinkWithVertices = cellsConnectedToLinksWithVertices.has(cell.id);
+        // Escludi i cerchi neri collegati ai link con vertici
+        return !(isBlackCircle && isConnectedToLinkWithVertices);
+    });
+
+    // Filtra i link da copiare, escludendo quelli con vertici
+    const filteredLinks = graph.getLinks().filter(link => {
+        const sourceId = link.get('source').id;
+        const targetId = link.get('target').id;
+
+        // Escludi i link che hanno vertici
+        const hasVertices = link.get('vertices') && link.get('vertices').length > 0;
+        return (elementIds.includes(sourceId) || elementIds.includes(targetId)) && !hasVertices;
+    });
+
+    // Crea il JSON finale con le celle e i link filtrati
     const json = {
-        cells: [...selectedCells, ...selectedLinks].map(cell => cell.toJSON())
+        cells: [...filteredCells, ...filteredLinks].map(cell => cell.toJSON())
     };
 
     localStorage.setItem('copiedElements', JSON.stringify(json));
     console.log(localStorage);
 }
+
+
 
 function pasteElements(targetGraph, localStorage) {
     const json = JSON.parse(localStorage.getItem('copiedElements'));
@@ -34,7 +61,7 @@ function pasteElements(targetGraph, localStorage) {
 
             if (cellData.position) {
                 newCell.position(cellData.position.x, cellData.position.y);
-                newCell.translate(50,50) //per evitare di sovrapporre gli elementi
+                newCell.translate(100,100) //per evitare di sovrapporre gli elementi
             } 
             if (cellData.size) {
                 newCell.resize(cellData.size.width, cellData.size.height);
@@ -44,6 +71,8 @@ function pasteElements(targetGraph, localStorage) {
 
             // Salva il mapping degli ID
             idMap.set(cellData.id, newCell.id);
+
+           
             return newCell;
         });
 
