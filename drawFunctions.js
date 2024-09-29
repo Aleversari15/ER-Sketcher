@@ -352,11 +352,14 @@ function updateLinkLabel(link, label) {
         var childToUpload = null;
         
         // Caso 1: Se la source è un rettangolo (entità)
-        if (link.getSourceCell().attributes.type === 'standard.Rectangle') {
+        if (link.getSourceCell().attributes.type === 'standard.Rectangle' || link.getTargetCell().attributes.type === 'standard.Rectangle' ) {
+            //se l'entità è la source cell, allora cerchiamo il suo id nella mappa delle entità 
             if (relationsMap.get(link.getSourceCell().id)) {
                 associations = relationsMap.get(link.getSourceCell().id);
                 childToUpload = link.getTargetCell();
-            } else if (relationsMap.get(link.getTargetCell().id)) {
+            } 
+            //altrimenti cerchiamo l'id della target cell
+            else if (relationsMap.get(link.getTargetCell().id)) {
                 associations = relationsMap.get(link.getTargetCell().id);
                 childToUpload = link.getSourceCell();
             }
